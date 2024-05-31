@@ -226,8 +226,8 @@ class SudokuGA:
         plt.show()
 
 
-def run_ga_twodoku(puzzle, solution_puzzle, runs=30, tournament_size=10, population_size=150, mutation_rate=0.2,
-                   crossover_rate=0.3, max_generations=10000):
+def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, population_size=150, mutation_rate=0.3,
+                   crossover_rate=0.3, max_generations=10000, local_search=True):
     solution_found = []
     generation_counts = []
     generation_counts_with_sol = []
@@ -244,7 +244,7 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=30, tournament_size=10, populat
                            mutation_rate=mutation_rate,
                            crossover_rate=crossover_rate,
                            max_generations=max_generations)
-        solution_pred, generations = twodoku.solve()
+        solution_pred, generations = twodoku.solve(local_search=local_search)
 
         total_time = time.time() - start_time
         times_exec.append(total_time)
@@ -252,9 +252,7 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=30, tournament_size=10, populat
         if solution_pred is None:
             solution_found.append(False)
         else:
-            print(solution_pred)
             np.testing.assert_array_equal(blocks_to_rows(solution_pred), np.array(solution_puzzle))
-
             solution_found.append(True)
             generation_counts_with_sol.append(generations)
 
