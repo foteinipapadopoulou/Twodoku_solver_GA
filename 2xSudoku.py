@@ -87,14 +87,13 @@ class SudokuGA:
             child1 = np.array(child1)
 
             indices_col = [(0, 3, 6), (1, 4, 7), (2, 5, 8, 11, 14), (9, 12, 15), (10, 13, 16)]
-            child2 = []
+            child2 = np.zeros((17, 9), dtype=int)
 
             # Column-wise crossover for child2
-            for i in range(5):
-                if scores[1][i] >= scores2[1][i]:
-                    child2.extend([parent1[i] for i in indices_col[i]])
-                else:
-                    child2.extend([parent2[i] for i in indices_col[i]])
+            for i, (score, score2) in enumerate(zip(scores[1], scores2[1])):
+                selected_parent = parent1 if score >= score2 else parent2
+                for j in indices_col[i]:
+                    child2[j] = selected_parent[j]
             child2 = np.array(child2)
 
             return child1, child2
