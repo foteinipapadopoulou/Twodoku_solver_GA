@@ -5,7 +5,7 @@ import time
 from collections import Counter
 import copy
 
-from twodokus import easy_twodoku_1, solution_easy_twodoku_1
+from twodokus import easy_twodoku_1, easy_twodoku_2, solution_easy_twodoku_1, solution_easy_twodoku_2
 from utils import blocks, blocks_to_rows, extract_seq_blocks, fixed_positions, random_fill, save_a_list, \
     save_a_multilist, scores_crossover, \
     single_fitness
@@ -62,7 +62,7 @@ class SudokuGA:
         samples = random.sample(self.population, self.tournament_size)
         # sort them and return the best
         samples.sort(key=lambda x: self.fitness(x))
-        return samples[0], samples[1]
+        return samples[0]
 
     def crossover(self, parent1, parent2):
         """
@@ -187,7 +187,8 @@ class SudokuGA:
 
         # loop until fill the population list
         while len(new_population) < self.population_size:
-            parent1, parent2 = self.tourn_selection()
+            parent1 = self.tourn_selection()
+            parent2 = self.tourn_selection()
             # cross over
             child1, child2 = self.crossover(np.array(parent1), np.array(parent2))
             # mutation 
@@ -263,13 +264,13 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
 
     print(
         f'Solutions found in {solutions_count_true} runs and on average in {np.mean(generation_counts_with_sol)} generations.')
-    print(f'Average execution time of each {runs} runs in seconds: {np.mean(times_exec)}')
+    print(f'Average execution time of each {runs} runs in seconds: {np.median(times_exec)}')
     return generation_counts, solution_found, times_exec, fitness_histories
 
 
-generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(easy_twodoku_1,
-                                                                                  solution_easy_twodoku_1)
-save_a_list("easy_1", times_exec, "times_exec", "")
-save_a_list("easy_1", solution_found, "solution_found", "")
-save_a_list("easy_1", generation_counts, "generation_counts", "")
-save_a_multilist("easy_1", fitness_histories, "fitness_histories", "")
+generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(easy_twodoku_2,
+                                                                                  solution_easy_twodoku_2)
+save_a_list("easy_2", times_exec, "times_exec", "")
+save_a_list("easy_2", solution_found, "solution_found", "")
+save_a_list("easy_2", generation_counts, "generation_counts", "")
+save_a_multilist("easy_2", fitness_histories, "fitness_histories", "")
