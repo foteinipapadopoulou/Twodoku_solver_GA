@@ -29,7 +29,8 @@ class SudokuGA:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.max_generations = max_generations
-        self.population, self.help_array = self.initialize_population()
+        self.population, self.help_array = self.initialize_population() # help array is in block format
+        self.help_array_rows_format = blocks_to_rows(self.help_array)
         self.fitness_history = []
 
     def initialize_population(self):
@@ -134,8 +135,8 @@ class SudokuGA:
                     for value, index in repeated_numbers_illegal_column:
                         for other_value, other_index in repeated_numbers_other_column:
                             # if the repeated numbers are in the same row and cell can be swapped
-                            if ((index == other_index) and (self.help_array[index, illegal_column] == 0)
-                                    and (self.help_array[index, other_column] == 0)):
+                            if ((index == other_index) and (self.help_array_rows_format[index, illegal_column] == 0)
+                                    and (self.help_array_rows_format[index, other_column] == 0)):
                                 if (value not in individual[:, other_column]) and (
                                         other_value not in individual[:, illegal_column]):
                                     # swap the repeated numbers
@@ -166,8 +167,8 @@ class SudokuGA:
                     for value, index in repeated_numbers_illegal_row:
                         for other_value, other_index in repeated_numbers_other_row:
                             # if the repeated numbers are in the same row and cell can be swapped
-                            if ((index == other_index) and (self.help_array[illegal_row, index] == 0)
-                                    and (self.help_array[other_row, other_index] == 0)):
+                            if ((index == other_index) and (self.help_array_rows_format[illegal_row, index] == 0)
+                                    and (self.help_array_rows_format[other_row, other_index] == 0)):
                                 if (value not in individual[other_row, :]) and (
                                         other_value not in individual[illegal_row, :]):
                                     # swap the repeated numbers
@@ -194,7 +195,7 @@ class SudokuGA:
             new_population.append(self.mutate(child2))
         self.population = new_population[:self.population_size]
 
-    def solve(self, local_search=False):
+    def solve(self, local_search=True):
         for generation in range(self.max_generations):
             # local search
             self.population.sort(key=lambda x: self.fitness(x))
@@ -251,7 +252,9 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=30, tournament_size=10, populat
         if solution_pred is None:
             solution_found.append(False)
         else:
+            print(solution_pred)
             np.testing.assert_array_equal(blocks_to_rows(solution_pred), np.array(solution_puzzle))
+
             solution_found.append(True)
             generation_counts_with_sol.append(generations)
 
