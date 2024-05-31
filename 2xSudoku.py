@@ -5,7 +5,8 @@ import time
 from collections import Counter
 import copy
 
-from twodokus import easy_twodoku_1, easy_twodoku_2, solution_easy_twodoku_1, solution_easy_twodoku_2
+from twodokus import easy_twodoku_1, easy_twodoku_2, medium_twodoku_1, solution_easy_twodoku_1, solution_easy_twodoku_2, \
+    solution_medium_twodoku_1
 from utils import blocks, blocks_to_rows, extract_seq_blocks, fixed_positions, random_fill, save_a_list, \
     save_a_multilist, scores_crossover, \
     single_fitness
@@ -69,33 +70,37 @@ class SudokuGA:
         Cross over between two parents and 
         calculate the scores of 
         """
+        if random.random() < self.crossover_rate:
 
-        scores = scores_crossover(parent1)
-        scores2 = scores_crossover(parent2)
+            scores = scores_crossover(parent1)
+            scores2 = scores_crossover(parent2)
 
-        indices_row = [(0, 3), (3, 6), (6, 11), (11, 14), (14, 17)]
-        child1 = []
+            indices_row = [(0, 3), (3, 6), (6, 11), (11, 14), (14, 17)]
+            child1 = []
 
-        # Row-wise crossover for child1
-        for i in range(5):
-            if scores[0][i] >= scores2[0][i]:
-                child1.extend(parent1[indices_row[i][0]:indices_row[i][1]])
-            else:
-                child1.extend(parent2[indices_row[i][0]:indices_row[i][1]])
-        child1 = np.array(child1)
+            # Row-wise crossover for child1
+            for i in range(5):
+                if scores[0][i] >= scores2[0][i]:
+                    child1.extend(parent1[indices_row[i][0]:indices_row[i][1]])
+                else:
+                    child1.extend(parent2[indices_row[i][0]:indices_row[i][1]])
+            child1 = np.array(child1)
 
-        indices_col = [(0, 3, 6), (1, 4, 7), (2, 5, 8, 11, 14), (9, 12, 15), (10, 13, 16)]
-        child2 = []
+            indices_col = [(0, 3, 6), (1, 4, 7), (2, 5, 8, 11, 14), (9, 12, 15), (10, 13, 16)]
+            child2 = []
 
-        # Column-wise crossover for child2
-        for i in range(5):
-            if scores[1][i] >= scores2[1][i]:
-                child2.extend([parent1[i] for i in indices_col[i]])
-            else:
-                child2.extend([parent2[i] for i in indices_col[i]])
-        child2 = np.array(child2)
+            # Column-wise crossover for child2
+            for i in range(5):
+                if scores[1][i] >= scores2[1][i]:
+                    child2.extend([parent1[i] for i in indices_col[i]])
+                else:
+                    child2.extend([parent2[i] for i in indices_col[i]])
+            child2 = np.array(child2)
 
-        return child1, child2
+            return child1, child2
+        else:
+            return parent1, parent2
+
 
     def mutate(self, candidate):
         cand = copy.deepcopy(candidate)
@@ -228,7 +233,7 @@ class SudokuGA:
 
 
 def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, population_size=150, mutation_rate=0.3,
-                   crossover_rate=0.3, max_generations=10000, local_search=True):
+                   crossover_rate=0.3, max_generations=5000, local_search=True):
     solution_found = []
     generation_counts = []
     generation_counts_with_sol = []
@@ -268,8 +273,8 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
     return generation_counts, solution_found, times_exec, fitness_histories
 
 
-generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(easy_twodoku_2,
-                                                                                  solution_easy_twodoku_2)
+generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
+                                                                                  solution_medium_twodoku_1)
 save_a_list("easy_2", times_exec, "times_exec", "")
 save_a_list("easy_2", solution_found, "solution_found", "")
 save_a_list("easy_2", generation_counts, "generation_counts", "")
