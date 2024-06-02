@@ -123,7 +123,7 @@ class SudokuGA:
     def column_local_search(self):
         def swap_columns(individual):
             # Record all illegal columns in the set C
-            C = [c for c in range(9) if len(set(individual[:, c])) != 9]
+            C = [c for c in range(6) if len(set(individual[:, c])) != 9]
 
             if len(C) > 1:
                 for illegal_column, other_column in combinations(C,2):
@@ -148,13 +148,13 @@ class SudokuGA:
         
         for individual in self.population:
                     temp = blocks_to_rows(individual)
-                    temp[:9] = swap_columns(temp[:9])
-                    temp[-9:] = swap_columns(temp[-9:])
+                    temp[:6] = swap_columns(temp[:6])
+                    temp[-6:] = swap_columns(temp[-6:])
                     individual = blocks(temp)
 
     def row_local_search(self):
         def swap_rows(individual):
-            C = [c for c in range(9) if len(set(individual[c, :])) != 9]
+            C = [c for c in range(6) if len(set(individual[c, :])) != 9]
 
             if len(C) > 1:
                 for illegal_row, other_row in combinations(C,2):
@@ -180,8 +180,8 @@ class SudokuGA:
 
         for individual in self.population:
             temp = blocks_to_rows(individual)
-            temp[:9] = swap_rows(temp[:9])
-            temp[-9:] = swap_rows(temp[-9:])
+            temp[:6] = swap_rows(temp[:6])
+            temp[-6:] = swap_rows(temp[-6:])
             individual = blocks(temp)
 
 
