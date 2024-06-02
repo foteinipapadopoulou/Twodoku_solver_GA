@@ -19,10 +19,11 @@ class SudokuGA:
 
     def __init__(self, puzzle,
                  tournament_size=3,
-                 population_size=100,
+                 population_size=150,
                  mutation_rate=0.5,
                  crossover_rate=0.5,
                  max_generations=100,
+                 elite_population_size=50
                  ):
         self.puzzle = blocks(np.array(puzzle))  # make it from normal row-col format to subblock format
         self.tournament_size = tournament_size
@@ -30,9 +31,13 @@ class SudokuGA:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.max_generations = max_generations
-        self.population, self.help_array = self.initialize_population() # help array is in block format
+        self.elite_population_size = elite_population_size
+        self.population, self.help_array = self.initialize_population()  # help array is in block format
         self.help_array_rows_format = blocks_to_rows(self.help_array)
+        self.fixed_numbers_rows_columns = [(self.puzzle[i][j], i ,j) for i in range(9) for j in range(9) if self.help_array[i][j] == 1]
+
         self.fitness_history = []
+        self.elite_population = []
 
     def initialize_population(self):
         """
@@ -94,7 +99,6 @@ class SudokuGA:
             return child1, child2
         else:
             return parent1, parent2
-
 
     def mutate(self, candidate):
         cand = copy.deepcopy(candidate)
@@ -181,6 +185,14 @@ class SudokuGA:
             individual[:9] = swap_rows(temp[:9])
             individual[-9:] = swap_rows(temp[-9:])
 
+    def check_valid_pop(self, child):
+        for number, row, column in self.fixed_numbers_rows_columns:
+            if child[row][column] != number:
+                print(f"Change is in {number}")
+                print("Removing wrong pop")
+                return False
+        return True
+
     def evolve(self):
         new_population = []
 
@@ -190,9 +202,16 @@ class SudokuGA:
             parent2 = self.tourn_selection()
             # cross over
             child1, child2 = self.crossover(np.array(parent1), np.array(parent2))
-            # mutation 
-            new_population.append(self.mutate(child1))
-            new_population.append(self.mutate(child2))
+            assert self.check_valid_pop(child1) is True
+            assert self.check_valid_pop(child2) is True
+            # mutation
+            child1 = self.mutate(child1)
+            child2 = self.mutate(child2)
+            assert self.check_valid_pop(child1) is True
+            assert self.check_valid_pop(child2) is True
+            new_population.append(child1)
+            new_population.append(child2)
+
         self.population = new_population[:self.population_size]
 
     def solve(self, local_search=True):
@@ -252,6 +271,7 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
         if solution_pred is None:
             solution_found.append(False)
         else:
+            print(blocks_to_rows(solution_pred))
             np.testing.assert_array_equal(blocks_to_rows(solution_pred), np.array(solution_puzzle))
             solution_found.append(True)
             generation_counts_with_sol.append(generations)
@@ -267,8 +287,8 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
     return generation_counts, solution_found, times_exec, fitness_histories
 
 
-generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
-                                                                                  solution_medium_twodoku_1)
+generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(easy_twodoku_1,
+                                                                                  solution_easy_twodoku_1)
 save_a_list("easy_2", times_exec, "times_exec", "")
 save_a_list("easy_2", solution_found, "solution_found", "")
 save_a_list("easy_2", generation_counts, "generation_counts", "")
