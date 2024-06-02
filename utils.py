@@ -170,7 +170,7 @@ def scores_crossover(cand):
     combined_col = upper_scores[1][2] + lower_scores[1][0]
 
     scores_row = upper_scores[0][:2] + [combined_row] + lower_scores[0][1:]
-    scores_col = upper_scores[0][:2] + [combined_col] + lower_scores[0][1:]
+    scores_col = upper_scores[1][:2] + [combined_col] + lower_scores[1][1:]
     return scores_row, scores_col
 
 

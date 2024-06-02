@@ -43,11 +43,8 @@ class SudokuGA:
 
         seq = self.puzzle
         fixed = fixed_positions(seq)
-        pop = []
-        for i in range(self.population_size):
-            candidate = random_fill(seq)
-            pop.append(candidate)
-
+        pop = [random_fill(seq) for _ in range(self.population_size)]
+    
         return pop, fixed
 
     def fitness(self, cand):
