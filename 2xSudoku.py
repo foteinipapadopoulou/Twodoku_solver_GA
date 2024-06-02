@@ -122,18 +122,28 @@ class SudokuGA:
 
     def column_local_search(self):
         def swap_columns(individual):
-            col_conflicts = {col: set(individual[:, col]) for col in range(9) if len(set(individual[:, col])) != 9}
-            if len(col_conflicts) > 1:
-                for col1, col2 in combinations(col_conflicts.keys(), 2):
-                    for row in range(9):
-                        if self.help_array_rows_format[row, col1] == 0 and self.help_array_rows_format[row, col2] == 0:
-                            val1, val2 = individual[row, col1], individual[row, col2]
-                            if val1 not in col_conflicts[col2] and val2 not in col_conflicts[col1]:
-                                individual[row, col1], individual[row, col2] = val2, val1
-                                col_conflicts[col1].discard(val1)
-                                col_conflicts[col1].add(val2)
-                                col_conflicts[col2].discard(val2)
-                                col_conflicts[col2].add(val1)
+            # Record all illegal columns in the set C
+            C = [c for c in range(9) if len(set(individual[:, c])) != 9]
+
+            if len(C) > 1:
+                for illegal_column, other_column in combinations(C,2):
+
+                    # find the rows that they have repeated numbers
+                    repeated_numbers_illegal_column = [(x, index) for index, x in
+                                                    enumerate(individual[:, illegal_column])
+                                                    if Counter(individual[:, illegal_column])[x] > 1]
+                    repeated_numbers_other_column = [(x, index) for index, x in enumerate(individual[:, other_column])
+                                                    if Counter(individual[:, other_column])[x] > 1]
+
+                    for value, index in repeated_numbers_illegal_column:
+                        for other_value, other_index in repeated_numbers_other_column:
+                            # if the repeated numbers are in the same row and cell can be swapped
+                            if ((index == other_index) and (self.help_array_rows_format[index, illegal_column] == 0)
+                                    and (self.help_array_rows_format[index, other_column] == 0)):
+                                if (value not in individual[:, other_column]) and (other_value not in individual[:, illegal_column]):
+                                    # swap the repeated numbers
+                                    individual[index, illegal_column], individual[index, other_column] = \
+                                        individual[index, other_column], individual[index, illegal_column]
             return individual
         
         for individual in self.population:
@@ -144,18 +154,28 @@ class SudokuGA:
 
     def row_local_search(self):
         def swap_rows(individual):
-            row_conflicts = {row: set(individual[row, :]) for row in range(9) if len(set(individual[row, :])) != 9}
-            if len(row_conflicts) > 1:
-                for row1, row2 in combinations(row_conflicts.keys(), 2):
-                    for col in range(9):
-                        if self.help_array_rows_format[row1, col] == 0 and self.help_array_rows_format[row2, col] == 0:
-                            val1, val2 = individual[row1, col], individual[row2, col]
-                            if val1 not in row_conflicts[row2] and val2 not in row_conflicts[row1]:
-                                individual[row1, col], individual[row2, col] = val2, val1
-                                row_conflicts[row1].discard(val1)
-                                row_conflicts[row1].add(val2)
-                                row_conflicts[row2].discard(val2)
-                                row_conflicts[row2].add(val1)
+            C = [c for c in range(9) if len(set(individual[c, :])) != 9]
+
+            if len(C) > 1:
+                for illegal_row, other_row in combinations(C,2):
+
+                    # find the rows that they have repeated numbers
+                    repeated_numbers_illegal_row = [(x, index) for index, x in enumerate(individual[illegal_row, :])
+                                                    if Counter(individual[illegal_row, :])[x] > 1]
+                    repeated_numbers_other_row = [(x, index) for index, x in enumerate(individual[other_row, :])
+                                                if Counter(individual[other_row, :])[x] > 1]
+
+                    for value, index in repeated_numbers_illegal_row:
+                        for other_value, other_index in repeated_numbers_other_row:
+                            # if the repeated numbers are in the same row and cell can be swapped
+                            if ((index == other_index) and (self.help_array_rows_format[illegal_row, index] == 0)
+                                    and (self.help_array_rows_format[other_row, other_index] == 0)):
+                                if (value not in individual[other_row, :]) and (
+                                        other_value not in individual[illegal_row, :]):
+                                    # swap the repeated numbers
+                                    individual[illegal_row, index], individual[other_row, index] = \
+                                        individual[other_row, index], individual[illegal_row, index]
+
             return individual
 
         for individual in self.population:
