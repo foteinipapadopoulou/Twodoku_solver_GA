@@ -91,8 +91,6 @@ class SudokuGA:
                 selected_parent = parent1 if score >= score2 else parent2
                 for j in indices_col[i]:
                     child2[j] = selected_parent[j]
-            child2 = np.array(child2)
-
             return child1, child2
         else:
             return parent1, parent2
