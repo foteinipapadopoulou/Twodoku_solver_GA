@@ -134,12 +134,13 @@ class SudokuGA:
                                 col_conflicts[col1].add(val2)
                                 col_conflicts[col2].discard(val2)
                                 col_conflicts[col2].add(val1)
-            return extract_seq_blocks(individual)
-
+            return individual
+        
         for individual in self.population:
-            temp = blocks_to_rows(individual)
-            individual[:9] = swap_columns(temp[:9])
-            individual[-9:] = swap_columns(temp[-9:])
+                    temp = blocks_to_rows(individual)
+                    temp[:9] = swap_columns(temp[:9])
+                    temp[-9:] = swap_columns(temp[-9:])
+                    individual = blocks(temp)
 
     def row_local_search(self):
         def swap_rows(individual):
@@ -155,12 +156,14 @@ class SudokuGA:
                                 row_conflicts[row1].add(val2)
                                 row_conflicts[row2].discard(val2)
                                 row_conflicts[row2].add(val1)
-            return extract_seq_blocks(individual)
+            return individual
 
         for individual in self.population:
             temp = blocks_to_rows(individual)
-            individual[:9] = swap_rows(temp[:9])
-            individual[-9:] = swap_rows(temp[-9:])
+            temp[:9] = swap_rows(temp[:9])
+            temp[-9:] = swap_rows(temp[-9:])
+            individual = blocks(temp)
+
 
     def check_valid_pop(self, child):
         for number, row, column in self.fixed_numbers_rows_columns:
