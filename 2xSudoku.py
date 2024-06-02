@@ -5,7 +5,7 @@ import random
 import time
 
 from collections import Counter
-from itertools import combinations
+from itertools import combinations, product
 
 from twodokus import easy_twodoku_1, easy_twodoku_2, medium_twodoku_1, solution_easy_twodoku_1, solution_easy_twodoku_2, \
     solution_medium_twodoku_1
@@ -286,10 +286,18 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
     print(f'Average execution time of each {runs} runs in seconds: {np.median(times_exec)}')
     return generation_counts, solution_found, times_exec, fitness_histories
 
+a = [0.2, 0.3, 0.4]
+# Generate all combinations of mutation and crossover rates
+comb = list(product(a, a))
 
-generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(easy_twodoku_1,
-                                                                                  solution_easy_twodoku_1)
-save_a_list("easy_2", times_exec, "times_exec", "")
-save_a_list("easy_2", solution_found, "solution_found", "")
-save_a_list("easy_2", generation_counts, "generation_counts", "")
-save_a_multilist("easy_2", fitness_histories, "fitness_histories", "")
+# Print all combinations
+for mut, cross in comb:
+    dic = {'Cross': cross, 'Mut': mut}
+    print(dic)
+    generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
+                                                                                      solution_medium_twodoku_1, mutation_rate = mut, crossover_rate = cross)
+
+    save_a_list("medium_1", times_exec, "times_exec", dic)
+    save_a_list("medium_1", solution_found, "solution_found", dic)
+    save_a_list("medium_1", generation_counts, "generation_counts", dic)
+    save_a_multilist("medium_1", fitness_histories, "fitness_histories", dic)
