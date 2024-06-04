@@ -21,11 +21,11 @@ class SudokuGA:
 
     def __init__(self, puzzle,
                  tournament_size=3,
-                 population_size=150,
+                 population_size=100,
                  mutation_rate=0.5,
                  crossover_rate=0.5,
                  max_generations=100,
-                 elite_population_size=50
+                 elite_population_size=50,
                  ):
         self.puzzle = blocks(np.array(puzzle))  # make it from normal row-col format to subblock format
         self.tournament_size = tournament_size
@@ -33,13 +33,11 @@ class SudokuGA:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.max_generations = max_generations
-        self.elite_population_size = elite_population_size
-        self.population, self.help_array = self.initialize_population()  # help array is in block format
+        self.population, self.help_array = self.initialize_population() # help array is in block format
         self.help_array_rows_format = blocks_to_rows(self.help_array)
-        self.fixed_numbers_rows_columns = [(self.puzzle[i][j], i ,j) for i in range(9) for j in range(9) if self.help_array[i][j] == 1]
-
         self.fitness_history = []
         self.elite_population = []
+        self.elite_population_size = elite_population_size
 
     def initialize_population(self):
         """
@@ -51,7 +49,7 @@ class SudokuGA:
         seq = self.puzzle
         fixed = fixed_positions(seq)
         pop = [random_fill(seq) for _ in range(self.population_size)]
-    
+
         return pop, fixed
 
     def fitness(self, cand):
@@ -71,11 +69,10 @@ class SudokuGA:
 
     def crossover(self, parent1, parent2):
         """
-        Cross over between two parents and 
-        calculate the scores of 
+        Cross over between two parents and
+        calculate the scores of
         """
         if random.random() < self.crossover_rate:
-
             scores = scores_crossover(parent1)
             scores2 = scores_crossover(parent2)
 
@@ -98,7 +95,11 @@ class SudokuGA:
                 selected_parent = parent1 if score >= score2 else parent2
                 for j in indices_col[i]:
                     child2[j] = selected_parent[j]
-            return child1, child2
+
+            best = [parent1, parent2, child1, child2]
+            best.sort(key=lambda x: self.fitness(x))
+            
+            return best[0], best[1]
         else:
             return parent1, parent2
 
@@ -145,12 +146,12 @@ class SudokuGA:
                                     individual[index, illegal_column], individual[index, other_column] = \
                                         individual[index, other_column], individual[index, illegal_column]
             return individual
-        
+
         for individual in self.population:
-                    temp = blocks_to_rows(individual)
-                    temp[:6] = swap_columns(temp[:6])
-                    temp[-6:] = swap_columns(temp[-6:])
-                    individual = blocks(temp)
+            temp = blocks_to_rows(individual)
+            temp[:6] = swap_columns(temp[:6])
+            temp[-6:] = swap_columns(temp[-6:])
+            individual = blocks(temp)
 
     def row_local_search(self):
         def swap_rows(individual):
@@ -185,41 +186,59 @@ class SudokuGA:
             individual = blocks(temp)
 
 
-    def check_valid_pop(self, child):
-        for number, row, column in self.fixed_numbers_rows_columns:
-            if child[row][column] != number:
-                print(f"Change is in {number}")
-                print("Removing wrong pop")
-                return False
-        return True
+    def update_elite_population(self):
+    # the elite population is a queue structure , that records the best individuals
+    # of each generation and updates them with new optimal individuals.
+
+        for individual in self.population:
+            fitness = self.fitness(individual)
+            if len(self.elite_population) < self.elite_population_size:
+                self.elite_population.append(individual.copy())
+
+                # sort the elite population based on the fitness value
+                sorted(self.elite_population, key=lambda x: self.fitness(x))
+
+            elif fitness < self.fitness(self.elite_population[-1]):
+                self.elite_population[-1] = individual.copy()
+                # sort the elite population based on the fitness value
+                sorted(self.elite_population, key=lambda x: self.fitness(x))
+
+    def elite_population_learning(self):
+    # In elite population learning, the worst individuals in the population are replaced by a random individual
+    # xrandom from the elite population or are, or are reinitialized.
+    # .We define the probability Pb to control this process.
+        worst_individuals = sorted(self.population, key=lambda x: self.fitness(x), reverse=True)[:self.elite_population_size]
+        for individual in worst_individuals:
+            random_elite_choice = random.choice(self.elite_population)  # TODO check so as not to add the same individual
+
+            pb = (self.fitness(individual) - self.fitness(random_elite_choice))/ self.fitness(individual)
+            if random.random() < pb:
+                # Replace with random elite individual
+                individual = random_elite_choice
+            else:  # Reinitialize
+                seq = self.puzzle
+                individual = random_fill(seq)
 
     def evolve(self):
         new_population = []
 
         # loop until fill the population list
         while len(new_population) < self.population_size:
-            parent1 = self.tourn_selection()
+            parent1 = self.tourn_selection() 
             parent2 = self.tourn_selection()
             # cross over
             child1, child2 = self.crossover(np.array(parent1), np.array(parent2))
-            assert self.check_valid_pop(child1) is True
-            assert self.check_valid_pop(child2) is True
             # mutation
-            child1 = self.mutate(child1)
-            child2 = self.mutate(child2)
-            assert self.check_valid_pop(child1) is True
-            assert self.check_valid_pop(child2) is True
-            new_population.append(child1)
-            new_population.append(child2)
-
+            new_population.append(self.mutate(child1))
+            new_population.append(self.mutate(child2))
         self.population = new_population[:self.population_size]
 
-    def solve(self, local_search=True):
+    def solve(self, local_search=True, elite = False):
         for generation in range(self.max_generations):
             # local search
             self.population.sort(key=lambda x: self.fitness(x))
 
-            # Calculate fitness of the best 
+            # Calculate fitness of the best
             best_fitness = self.fitness(self.population[0])
 
             self.fitness_history.append(best_fitness)
@@ -235,6 +254,14 @@ class SudokuGA:
             if local_search:
                 self.column_local_search()
                 self.row_local_search()
+
+            if elite:
+                # Update the elite population
+                self.update_elite_population()
+
+                # Elite population learning
+                self.elite_population_learning()
+
         return None, self.max_generations
 
     def plot_fitness_history(self):
