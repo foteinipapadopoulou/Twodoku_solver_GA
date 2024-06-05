@@ -21,11 +21,11 @@ class SudokuGA:
 
     def __init__(self, puzzle,
                  tournament_size=3,
-                 population_size=100,
+                 population_size=150,
                  mutation_rate=0.5,
                  crossover_rate=0.5,
                  max_generations=100,
-                 elite_population_size=50,
+                 elite_population_size=50
                  ):
         self.puzzle = blocks(np.array(puzzle))  # make it from normal row-col format to subblock format
         self.tournament_size = tournament_size
@@ -224,7 +224,7 @@ class SudokuGA:
 
         # loop until fill the population list
         while len(new_population) < self.population_size:
-            parent1 = self.tourn_selection() 
+            parent1 = self.tourn_selection()
             parent2 = self.tourn_selection()
             # cross over
             child1, child2 = self.crossover(np.array(parent1), np.array(parent2))
@@ -232,6 +232,13 @@ class SudokuGA:
             new_population.append(self.mutate(child1))
             new_population.append(self.mutate(child2))
         self.population = new_population[:self.population_size]
+
+    def check_populations(self):
+        for individual in self.population:
+            if self.check_valid_pop(individual) is False:
+                print("Invalid Population")
+                return False
+        return True
 
     def solve(self, local_search=True, elite = False):
         for generation in range(self.max_generations):
@@ -320,11 +327,15 @@ comb = list(product(a, a))
 # Print all combinations
 for mut, cross in comb:
     dic = {'Cross': cross, 'Mut': mut}
-    print(dic)
+    print(f"mut_{str(mut)}_cross_{str(cross)}")
     generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
-                                                                                      solution_medium_twodoku_1, mutation_rate = mut, crossover_rate = cross)
+                                                                                  solution_medium_twodoku_1,
+                                                                                  mutation_rate=mut,
+                                                                                  crossover_rate=cross,
+                                                                                  local_search=False,
+                                                                                  population_size=150)
 
-    save_a_list("medium_1", times_exec, "times_exec", dic)
-    save_a_list("medium_1", solution_found, "solution_found", dic)
-    save_a_list("medium_1", generation_counts, "generation_counts", dic)
-    save_a_multilist("medium_1", fitness_histories, "fitness_histories", dic)
+    save_a_list("medium_1", times_exec, "times_exec", f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_list("medium_1", solution_found, "solution_found", f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_list("medium_1", generation_counts, "generation_counts", f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_multilist("medium_1", fitness_histories, "fitness_histories", f"mut_{str(mut)}_cross_{str(cross)}")
