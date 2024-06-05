@@ -95,11 +95,7 @@ class SudokuGA:
                 selected_parent = parent1 if score >= score2 else parent2
                 for j in indices_col[i]:
                     child2[j] = selected_parent[j]
-
-            best = [parent1, parent2, child1, child2]
-            best.sort(key=lambda x: self.fitness(x))
-            
-            return best[0], best[1]
+            return child1, child2
         else:
             return parent1, parent2
 
