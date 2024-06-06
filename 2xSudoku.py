@@ -33,7 +33,7 @@ class SudokuGA:
         self.mutation_rate = mutation_rate
         self.crossover_rate = crossover_rate
         self.max_generations = max_generations
-        self.population, self.help_array = self.initialize_population() # help array is in block format
+        self.population, self.help_array = self.initialize_population()  # help array is in block format
         self.help_array_rows_format = blocks_to_rows(self.help_array)
         self.fitness_history = []
         self.elite_population = []
@@ -123,44 +123,45 @@ class SudokuGA:
             C = [c for c in range(6) if len(set(individual[:, c])) != 9]
 
             if len(C) > 1:
-                for illegal_column, other_column in combinations(C,2):
+                for illegal_column, other_column in combinations(C, 2):
 
                     # find the rows that they have repeated numbers
                     repeated_numbers_illegal_column = [(x, index) for index, x in
-                                                    enumerate(individual[:, illegal_column])
-                                                    if Counter(individual[:, illegal_column])[x] > 1]
+                                                       enumerate(individual[:, illegal_column])
+                                                       if Counter(individual[:, illegal_column])[x] > 1]
                     repeated_numbers_other_column = [(x, index) for index, x in enumerate(individual[:, other_column])
-                                                    if Counter(individual[:, other_column])[x] > 1]
+                                                     if Counter(individual[:, other_column])[x] > 1]
 
                     for value, index in repeated_numbers_illegal_column:
                         for other_value, other_index in repeated_numbers_other_column:
                             # if the repeated numbers are in the same row and cell can be swapped
                             if ((index == other_index) and (self.help_array_rows_format[index, illegal_column] == 0)
                                     and (self.help_array_rows_format[index, other_column] == 0)):
-                                if (value not in individual[:, other_column]) and (other_value not in individual[:, illegal_column]):
+                                if (value not in individual[:, other_column]) and (
+                                        other_value not in individual[:, illegal_column]):
                                     # swap the repeated numbers
                                     individual[index, illegal_column], individual[index, other_column] = \
                                         individual[index, other_column], individual[index, illegal_column]
             return individual
 
-        for individual in self.population:
+        for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
             temp[:6] = swap_columns(temp[:6])
             temp[-6:] = swap_columns(temp[-6:])
-            individual = blocks(temp)
+            self.population[index] = blocks(temp)
 
     def row_local_search(self):
         def swap_rows(individual):
             C = [c for c in range(6) if len(set(individual[c, :])) != 9]
 
             if len(C) > 1:
-                for illegal_row, other_row in combinations(C,2):
+                for illegal_row, other_row in combinations(C, 2):
 
                     # find the rows that they have repeated numbers
                     repeated_numbers_illegal_row = [(x, index) for index, x in enumerate(individual[illegal_row, :])
                                                     if Counter(individual[illegal_row, :])[x] > 1]
                     repeated_numbers_other_row = [(x, index) for index, x in enumerate(individual[other_row, :])
-                                                if Counter(individual[other_row, :])[x] > 1]
+                                                  if Counter(individual[other_row, :])[x] > 1]
 
                     for value, index in repeated_numbers_illegal_row:
                         for other_value, other_index in repeated_numbers_other_row:
@@ -175,16 +176,15 @@ class SudokuGA:
 
             return individual
 
-        for individual in self.population:
+        for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
             temp[:6] = swap_rows(temp[:6])
             temp[-6:] = swap_rows(temp[-6:])
-            individual = blocks(temp)
-
+            self.population[index] = blocks(temp)
 
     def update_elite_population(self):
-    # the elite population is a queue structure , that records the best individuals
-    # of each generation and updates them with new optimal individuals.
+        # the elite population is a queue structure , that records the best individuals
+        # of each generation and updates them with new optimal individuals.
 
         for individual in self.population:
             fitness = self.fitness(individual)
@@ -200,20 +200,22 @@ class SudokuGA:
                 sorted(self.elite_population, key=lambda x: self.fitness(x))
 
     def elite_population_learning(self):
-    # In elite population learning, the worst individuals in the population are replaced by a random individual
-    # xrandom from the elite population or are, or are reinitialized.
-    # .We define the probability Pb to control this process.
-        worst_individuals = sorted(self.population, key=lambda x: self.fitness(x), reverse=True)[:self.elite_population_size]
-        for individual in worst_individuals:
-            random_elite_choice = random.choice(self.elite_population)  # TODO check so as not to add the same individual
+        # In elite population learning, the worst individuals in the population are replaced by a random individual
+        # xrandom from the elite population or are, or are reinitialized.
+        # .We define the probability Pb to control this process.
+        worst_individuals = sorted(self.population, key=lambda x: self.fitness(x), reverse=True)[
+                            :self.elite_population_size]
+        for index,individual in enumerate(worst_individuals):
+            random_elite_choice = random.choice(
+                self.elite_population)  # TODO check so as not to add the same individual
 
-            pb = (self.fitness(individual) - self.fitness(random_elite_choice))/ self.fitness(individual)
+            pb = (self.fitness(individual) - self.fitness(random_elite_choice)) / self.fitness(individual)
             if random.random() < pb:
                 # Replace with random elite individual
-                individual = random_elite_choice
+                worst_individuals[index] = random_elite_choice
             else:  # Reinitialize
                 seq = self.puzzle
-                individual = random_fill(seq)
+                worst_individuals[index] = random_fill(seq)
 
     def evolve(self):
         new_population = []
@@ -236,7 +238,7 @@ class SudokuGA:
                 return False
         return True
 
-    def solve(self, local_search=True, elite = False):
+    def solve(self, local_search=True, elite=False):
         for generation in range(self.max_generations):
             # local search
             self.population.sort(key=lambda x: self.fitness(x))
@@ -316,6 +318,7 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
     print(f'Average execution time of each {runs} runs in seconds: {np.median(times_exec)}')
     return generation_counts, solution_found, times_exec, fitness_histories
 
+
 a = [0.2, 0.3, 0.4]
 # Generate all combinations of mutation and crossover rates
 comb = list(product(a, a))
@@ -323,16 +326,18 @@ comb = list(product(a, a))
 # Print all combinations
 for mut, cross in comb:
     dic = {'Cross': cross, 'Mut': mut}
-    print(f"mut_{str(mut)}_cross_{str(cross)}")
-    generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
-                                                                                  solution_medium_twodoku_1,
-                                                                                  mutation_rate=mut,
-                                                                                  crossover_rate=cross,
-                                                                                  local_search=True,
-                                                                                  population_size=150,
-                                                                                      runs=15)
 
-    save_a_list("medium_1", times_exec, "times_exec", f"mut_{str(mut)}_cross_{str(cross)}")
-    save_a_list("medium_1", solution_found, "solution_found", f"mut_{str(mut)}_cross_{str(cross)}")
-    save_a_list("medium_1", generation_counts, "generation_counts", f"mut_{str(mut)}_cross_{str(cross)}")
-    save_a_multilist("medium_1", fitness_histories, "fitness_histories", f"mut_{str(mut)}_cross_{str(cross)}")
+    print(f"mut_{str(mut)}_cross_{str(cross)}")
+    if mut == 0.2 and cross == 0.2:
+        generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
+                                                                                          solution_medium_twodoku_1,
+                                                                                          mutation_rate=mut,
+                                                                                          crossover_rate=cross,
+                                                                                          local_search=True,
+                                                                                          population_size=150,
+                                                                                          runs=15)
+
+        save_a_list("medium_1", times_exec, "times_exec", f"mut_{str(mut)}_cross_{str(cross)}")
+        save_a_list("medium_1", solution_found, "solution_found", f"mut_{str(mut)}_cross_{str(cross)}")
+        save_a_list("medium_1", generation_counts, "generation_counts", f"mut_{str(mut)}_cross_{str(cross)}")
+        save_a_multilist("medium_1", fitness_histories, "fitness_histories", f"mut_{str(mut)}_cross_{str(cross)}")
