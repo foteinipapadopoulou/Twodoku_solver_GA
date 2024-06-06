@@ -146,8 +146,8 @@ class SudokuGA:
 
         for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
-            temp[:6] = swap_columns(temp[:6])
-            temp[-6:] = swap_columns(temp[-6:])
+            temp[:9] = swap_columns(temp[:9])
+            temp[-9:] = swap_columns(temp[-9:])
             self.population[index] = blocks(temp)
 
     def row_local_search(self):
@@ -178,8 +178,8 @@ class SudokuGA:
 
         for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
-            temp[:6] = swap_rows(temp[:6])
-            temp[-6:] = swap_rows(temp[-6:])
+            temp[:9] = swap_rows(temp[:9])
+            temp[-9:] = swap_rows(temp[-9:])
             self.population[index] = blocks(temp)
 
     def update_elite_population(self):
