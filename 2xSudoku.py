@@ -118,9 +118,13 @@ class SudokuGA:
         return cand
 
     def column_local_search(self):
-        def swap_columns(individual):
-            # Record all illegal columns in the set C
-            C = [c for c in range(6) if len(set(individual[:, c])) != 9]
+        def swap_columns(individual, upper = True):
+
+            if upper:
+                # Record all illegal columns in the set C
+                C = [c for c in range(6) if len(set(individual[:, c])) != 9]
+            else: 
+                C = [c for c in range(6) if len(set(individual[:, c+3])) != 9] #Skip the first 3 columns of the lower sudoku
 
             if len(C) > 1:
                 for illegal_column, other_column in combinations(C, 2):
@@ -147,12 +151,16 @@ class SudokuGA:
         for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
             temp[:9] = swap_columns(temp[:9])
-            temp[-9:] = swap_columns(temp[-9:])
+            temp[-9:] = swap_columns(temp[-9:], upper = False)
             self.population[index] = blocks(temp)
 
     def row_local_search(self):
-        def swap_rows(individual):
-            C = [c for c in range(6) if len(set(individual[c, :])) != 9]
+        def swap_rows(individual, upper = True):
+
+            if upper:
+                C = [c for c in range(6) if len(set(individual[c, :])) != 9]
+            else:
+                C = [c for c in range(6) if len(set(individual[c+3, :])) != 9] #Skip the first 3 rows of the lower sudoku
 
             if len(C) > 1:
                 for illegal_row, other_row in combinations(C, 2):
@@ -179,7 +187,7 @@ class SudokuGA:
         for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
             temp[:9] = swap_rows(temp[:9])
-            temp[-9:] = swap_rows(temp[-9:])
+            temp[-9:] = swap_rows(temp[-9:], upper = False)
             self.population[index] = blocks(temp)
 
     def update_elite_population(self):
