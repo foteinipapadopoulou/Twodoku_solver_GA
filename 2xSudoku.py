@@ -328,8 +328,9 @@ for mut, cross in comb:
                                                                                   solution_medium_twodoku_1,
                                                                                   mutation_rate=mut,
                                                                                   crossover_rate=cross,
-                                                                                  local_search=False,
-                                                                                  population_size=150)
+                                                                                  local_search=True,
+                                                                                  population_size=150,
+                                                                                      runs=15)
 
     save_a_list("medium_1", times_exec, "times_exec", f"mut_{str(mut)}_cross_{str(cross)}")
     save_a_list("medium_1", solution_found, "solution_found", f"mut_{str(mut)}_cross_{str(cross)}")
