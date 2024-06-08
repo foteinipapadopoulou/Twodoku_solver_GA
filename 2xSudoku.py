@@ -123,8 +123,10 @@ class SudokuGA:
             if upper:
                 # Record all illegal columns in the set C
                 C = [c for c in range(6) if len(set(individual[:, c])) != 9]
+                help_array = self.help_array_rows_format[:9]
             else: 
                 C = [c for c in range(6) if len(set(individual[:, c+3])) != 9] #Skip the first 3 columns of the lower sudoku
+                help_array = self.help_array_rows_format[-9:]
 
             if len(C) > 1:
                 for illegal_column, other_column in combinations(C, 2):
@@ -139,8 +141,8 @@ class SudokuGA:
                     for value, index in repeated_numbers_illegal_column:
                         for other_value, other_index in repeated_numbers_other_column:
                             # if the repeated numbers are in the same row and cell can be swapped
-                            if ((index == other_index) and (self.help_array_rows_format[index, illegal_column] == 0)
-                                    and (self.help_array_rows_format[index, other_column] == 0)):
+                            if ((index == other_index) and (help_array[index, illegal_column] == 0)
+                                    and (help_array[index, other_column] == 0)):
                                 if (value not in individual[:, other_column]) and (
                                         other_value not in individual[:, illegal_column]):
                                     # swap the repeated numbers
@@ -159,9 +161,10 @@ class SudokuGA:
 
             if upper:
                 C = [c for c in range(6) if len(set(individual[c, :])) != 9]
+                help_array = self.help_array_rows_format[:9]
             else:
                 C = [c for c in range(6) if len(set(individual[c+3, :])) != 9] #Skip the first 3 rows of the lower sudoku
-
+                help_array = self.help_array_rows_format[-9:]
             if len(C) > 1:
                 for illegal_row, other_row in combinations(C, 2):
 
@@ -174,8 +177,8 @@ class SudokuGA:
                     for value, index in repeated_numbers_illegal_row:
                         for other_value, other_index in repeated_numbers_other_row:
                             # if the repeated numbers are in the same row and cell can be swapped
-                            if ((index == other_index) and (self.help_array_rows_format[illegal_row, index] == 0)
-                                    and (self.help_array_rows_format[other_row, other_index] == 0)):
+                            if ((index == other_index) and (help_array[illegal_row, index] == 0)
+                                    and (help_array[other_row, other_index] == 0)):
                                 if (value not in individual[other_row, :]) and (
                                         other_value not in individual[illegal_row, :]):
                                     # swap the repeated numbers
