@@ -78,7 +78,7 @@ def random_fill(sequences_cand):
     Returns the updated list
     """
 
-    sequences = copy.deepcopy(sequences_cand)
+    sequences = sequences_cand.copy()
     sequence = np.arange(0, 10)
     for seq in sequences:
         new_sequence = [num for num in sequence if num not in seq]

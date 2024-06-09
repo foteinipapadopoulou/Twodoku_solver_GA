@@ -100,7 +100,7 @@ class SudokuGA:
             return parent1, parent2
 
     def mutate(self, candidate):
-        cand = copy.deepcopy(candidate)
+        cand = candidate.copy()
         for block_index, subblock in enumerate(cand):
             if random.random() < self.mutation_rate:
                 indices = np.arange(9)
