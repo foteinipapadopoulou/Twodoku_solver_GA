@@ -7,9 +7,10 @@ import time
 from collections import Counter
 from itertools import combinations, product
 
-from twodokus import easy_twodoku_1, easy_twodoku_2, hard_twodoku, medium_twodoku_1, solution_easy_twodoku_1, \
+from twodokus import easy_twodoku_1, easy_twodoku_2, easy_twodoku_3, hard_twodoku, medium_twodoku_1, \
+    solution_easy_twodoku_1, \
     solution_easy_twodoku_2, \
-    solution_hard_twodoku, solution_medium_twodoku_1
+    solution_easy_twodoku_3, solution_hard_twodoku, solution_medium_twodoku_1
 from utils import blocks, blocks_to_rows, extract_seq_blocks, fixed_positions, random_fill, save_a_list, \
     save_a_multilist, scores_crossover, \
     single_fitness
@@ -371,25 +372,41 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
     return generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories
 
 
-def run_ga_mutation_crosover_rates(twodoku, solution_twodoku):
+def run_ga_mutation_crosover_rates(twodoku, solution_twodoku,runs, local_search, elite, max_gens, pop_size=150):
     rates = [0.2, 0.3, 0.4]
     # Generate all combinations of mutation and crossover rates
     comb = list(product(rates, rates))
 
     # Print all combinations
     for mut, cross in comb:
-        print(f"mut_{str(mut)}_cross_{str(cross)}")
-        generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(twodoku,
-                                                                                          solution_twodoku,
-                                                                                          mutation_rate=mut,
-                                                                                          crossover_rate=cross,
-                                                                                          local_search=True,
-                                                                                          population_size=150,
-                                                                                          runs=15)
-        extra_params = f'mut_{str(mut)}_cross_{str(cross)}'
-        save_a_list("medium_1", solution_found, "solution_found", extra_params)
-        save_a_list("medium_1", generation_counts, "generation_counts", extra_params)
-        save_a_multilist("medium_1", fitness_histories, "fitness_histories", extra_params)
+        print(f'Running experiment:\n---------------\n'
+              f'runs = {runs}\n'
+              f'mutation rate = {mut}\n'
+              f'crossover rate = {cross}\n'
+              f'local search = {local_search}\n'
+              f'elite = {elite}\n'
+              f'max generations = {max_gens}\n'
+              f'population size = {pop_size}\n---------------\n')
+        if mut == 0.2:
+
+            generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(twodoku,
+                                                                                              solution_twodoku,
+                                                                                              mutation_rate=mut,
+                                                                                              crossover_rate=cross,
+                                                                                              local_search=local_search,
+                                                                                              elite=elite,
+                                                                                              population_size=pop_size,
+                                                                                              max_generations=max_gens,
+                                                                                              runs=runs)
+            extra_params = f'mut_{str(mut)}_cross_{str(cross)}'
+            save_a_list(f'{PATH}{twodoku_name}', solution_found, "solution_found", extra_params)
+            save_a_list(f'{PATH}{twodoku_name}', generation_counts, "generation_counts", extra_params)
+            save_a_multilist(f'{PATH}{twodoku_name}', fitness_histories, "fitness_histories", extra_params)
+            save_a_multilist(f'{PATH}{twodoku_name}', fitness_mean_histories, "fitness_mean_histories",
+                             extra_params)
+            save_a_multilist(f'{PATH}{twodoku_name}', fitness_median_histories, "fitness_median_histories",
+                             extra_params)
+            print("Experiment finished")
 
 def run_experiment(twodoku, solution_twodoku, mut, cross, runs, local_search, elite, max_gens, pop_size=150):
     print(f'Running experiment:\n---------------\n'
@@ -425,25 +442,31 @@ if __name__ == '__main__':
     PATH = './results/'
 
     ### Change these to run with different twodoku levels
-    twodoku_name = 'easy_1'
-    twodoku = easy_twodoku_1
-    solution_twodoku = solution_easy_twodoku_1
+    twodoku_name = 'medium_1'
+    twodoku = medium_twodoku_1
+    solution_twodoku = solution_medium_twodoku_1
     print(f"The {twodoku_name} twodoku is used.")
 
     # Change this to TRUE to run the rates experiment
-    RUN_RATES_EXPERIMENT = False
+    RUN_RATES_EXPERIMENT = True
 
     if RUN_RATES_EXPERIMENT is True:
-        run_ga_mutation_crosover_rates(twodoku, solution_twodoku)
+        runs = 15
+        local_search = True
+        elite = False
+        max_gens = 5000
+        pop_size = 150
+        run_ga_mutation_crosover_rates(twodoku, solution_twodoku, runs=runs, local_search=local_search, elite=elite,
+                                       max_gens=max_gens, pop_size=pop_size)
 
-    RUN_EXPERIMENT = True
+    RUN_EXPERIMENT = False
     if RUN_EXPERIMENT is True:
         # Define the settings you want to run
         mut = 0.2
         cross = 0.2
-        runs = 1
+        runs = 100
         local_search = False
-        elite = False
+        elite = True
         max_gens = 5000
         pop_size = 150
         run_experiment(twodoku=twodoku, solution_twodoku=solution_twodoku, mut=mut, cross=cross, runs=runs,
