@@ -372,12 +372,12 @@ def run_ga_mutation_crosover_rates(twodoku, solution_twodoku):
                                                                                           local_search=True,
                                                                                           population_size=150,
                                                                                           runs=15)
+        extra_params = f'mut_{str(mut)}_cross_{str(cross)}'
+        save_a_list("medium_1", solution_found, "solution_found", extra_params)
+        save_a_list("medium_1", generation_counts, "generation_counts", extra_params)
+        save_a_multilist("medium_1", fitness_histories, "fitness_histories", extra_params)
 
-        save_a_list("medium_1", solution_found, "solution_found", f"mut_{str(mut)}_cross_{str(cross)}")
-        save_a_list("medium_1", generation_counts, "generation_counts", f"mut_{str(mut)}_cross_{str(cross)}")
-        save_a_multilist("medium_1", fitness_histories, "fitness_histories", f"mut_{str(mut)}_cross_{str(cross)}")
-
-def run_experiment(mut, cross, runs, local_search, elite, max_gens, pop_size=150):
+def run_experiment(twodoku, solution_twodoku, mut, cross, runs, local_search, elite, max_gens, pop_size=150):
     print(f'Running experiment:\n---------------\n'
           f'runs = {runs}\n'
           f'mutation rate = {mut}\n'
@@ -395,16 +395,14 @@ def run_experiment(mut, cross, runs, local_search, elite, max_gens, pop_size=150
         population_size=pop_size,
         runs=runs,
         max_generations=max_gens)
-    save_a_list(f'{PATH}{twodoku_name}', solution_found, "solution_found",
-                f"mut_{str(mut)}_cross_{str(cross)}")
-    save_a_list(f'{PATH}{twodoku_name}', generation_counts, "generation_counts",
-                f"mut_{str(mut)}_cross_{str(cross)}")
-    save_a_multilist(f'{PATH}{twodoku_name}', fitness_histories, "fitness_histories",
-                     f"mut_{str(mut)}_cross_{str(cross)}")
+    extra_params = f"local_search_{str(local_search)}_elite_{str(elite)}"
+    save_a_list(f'{PATH}{twodoku_name}', solution_found, "solution_found", extra_params)
+    save_a_list(f'{PATH}{twodoku_name}', generation_counts, "generation_counts", extra_params)
+    save_a_multilist(f'{PATH}{twodoku_name}', fitness_histories, "fitness_histories", extra_params)
     save_a_multilist(f'{PATH}{twodoku_name}', fitness_mean_histories, "fitness_mean_histories",
-                     f"mut_{str(mut)}_cross_{str(cross)}")
+                     extra_params)
     save_a_multilist(f'{PATH}{twodoku_name}', fitness_median_histories, "fitness_median_histories",
-                     f"mut_{str(mut)}_cross_{str(cross)}")
+                     extra_params)
     print("Experiment finished")
 
 
@@ -434,4 +432,5 @@ if __name__ == '__main__':
         elite = False
         max_gens = 5000
         pop_size = 150
-        run_experiment(mut=mut, cross=cross, runs=runs, local_search=local_search, elite=elite, max_gens=max_gens, pop_size=pop_size)
+        run_experiment(twodoku=twodoku, solution_twodoku=solution_twodoku, mut=mut, cross=cross, runs=runs,
+                       local_search=local_search, elite=elite, max_gens=max_gens, pop_size=pop_size)
