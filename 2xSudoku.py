@@ -7,8 +7,9 @@ import time
 from collections import Counter
 from itertools import combinations, product
 
-from twodokus import easy_twodoku_1, easy_twodoku_2, medium_twodoku_1, solution_easy_twodoku_1, solution_easy_twodoku_2, \
-    solution_medium_twodoku_1
+from twodokus import easy_twodoku_1, easy_twodoku_2, hard_twodoku, medium_twodoku_1, solution_easy_twodoku_1, \
+    solution_easy_twodoku_2, \
+    solution_hard_twodoku, solution_medium_twodoku_1
 from utils import blocks, blocks_to_rows, extract_seq_blocks, fixed_positions, random_fill, save_a_list, \
     save_a_multilist, scores_crossover, \
     single_fitness
@@ -35,7 +36,12 @@ class SudokuGA:
         self.max_generations = max_generations
         self.population, self.help_array = self.initialize_population()  # help array is in block format
         self.help_array_rows_format = blocks_to_rows(self.help_array)
+        self.fixed_numbers_rows_columns = [(self.puzzle[i][j], i, j) for i in range(9) for j in range(9) if
+                                           self.help_array[i][j] == 1]
         self.fitness_history = []
+        self.fitness_mean_history = []
+        self.fitness_median_history = []
+
         self.elite_population = []
         self.elite_population_size = elite_population_size
 
@@ -190,7 +196,7 @@ class SudokuGA:
         for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
             temp[:9] = swap_rows(temp[:9])
-            temp[-9:] = swap_rows(temp[-9:], upper = False)
+            temp[-9:] = swap_rows(temp[-9:], upper=False)
             self.population[index] = blocks(temp)
 
     def update_elite_population(self):
@@ -218,7 +224,7 @@ class SudokuGA:
                             :self.elite_population_size]
         for index,individual in enumerate(worst_individuals):
             random_elite_choice = random.choice(
-                self.elite_population)  # TODO check so as not to add the same individual
+                self.elite_population)
 
             pb = (self.fitness(individual) - self.fitness(random_elite_choice)) / self.fitness(individual)
             if random.random() < pb:
@@ -257,9 +263,16 @@ class SudokuGA:
             # Calculate fitness of the best
             best_fitness = self.fitness(self.population[0])
 
+            # Calculate mean and median fitness of the population
+            mean_fitness = np.mean([self.fitness(individual) for individual in self.population])
+            median_fitness = np.median([self.fitness(individual) for individual in self.population])
+
             self.fitness_history.append(best_fitness)
+            self.fitness_mean_history.append(mean_fitness)
+            self.fitness_median_history.append(median_fitness)
+
             if generation % 100 == 0:
-                print(f"Generation {generation}: Best fitness = {best_fitness}")
+                print(f"Generation {generation}: Best fitness = {best_fitness}, Mean fitness: = {mean_fitness}, Median fitness: = {median_fitness}")
             if best_fitness == 0:
                 # Found Solution
                 print(f"Found solution in Generation {generation}")
@@ -287,14 +300,25 @@ class SudokuGA:
         plt.title('Best Fitness Value over Generations')
         plt.show()
 
+    def check_valid_pop(self, child):
+        for number, row, column in self.fixed_numbers_rows_columns:
+            if child[row][column] != number:
+                print(f"Change is in {number}")
+                print("Removing wrong pop")
+                return False
+        return True
+
 
 def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, population_size=150, mutation_rate=0.3,
-                   crossover_rate=0.3, max_generations=5000, local_search=True):
+                   crossover_rate=0.3, max_generations=5000, local_search=True, elite=False):
     solution_found = []
     generation_counts = []
     generation_counts_with_sol = []
     times_exec = []
     fitness_histories = []
+    fitness_mean_histories = []
+    fitness_median_histories = []
+
     for run in range(runs):
         print(f'##### Run = {run}')
 
@@ -306,7 +330,7 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
                            mutation_rate=mutation_rate,
                            crossover_rate=crossover_rate,
                            max_generations=max_generations)
-        solution_pred, generations = twodoku.solve(local_search=local_search)
+        solution_pred, generations = twodoku.solve(local_search=local_search, elite=elite)
 
         total_time = time.time() - start_time
         times_exec.append(total_time)
@@ -321,34 +345,93 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
 
         generation_counts.append(generations)
         fitness_histories.append(twodoku.fitness_history)
+        fitness_mean_histories.append(twodoku.fitness_mean_history)
+        fitness_median_histories.append(twodoku.fitness_median_history)
+
     counter = Counter(solution_found)
     solutions_count_true = counter[True]
 
     print(
         f'Solutions found in {solutions_count_true} runs and on average in {np.mean(generation_counts_with_sol)} generations.')
     print(f'Average execution time of each {runs} runs in seconds: {np.median(times_exec)}')
-    return generation_counts, solution_found, times_exec, fitness_histories
+    return generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories
 
 
-a = [0.2, 0.3, 0.4]
-# Generate all combinations of mutation and crossover rates
-comb = list(product(a, a))
+def run_ga_mutation_crosover_rates(twodoku, solution_twodoku):
+    rates = [0.2, 0.3, 0.4]
+    # Generate all combinations of mutation and crossover rates
+    comb = list(product(rates, rates))
 
-# Print all combinations
-for mut, cross in comb:
-    dic = {'Cross': cross, 'Mut': mut}
-
-    print(f"mut_{str(mut)}_cross_{str(cross)}")
-    if mut == 0.2 and cross == 0.2:
-        generation_counts, solution_found, times_exec, fitness_histories = run_ga_twodoku(medium_twodoku_1,
-                                                                                          solution_medium_twodoku_1,
+    # Print all combinations
+    for mut, cross in comb:
+        print(f"mut_{str(mut)}_cross_{str(cross)}")
+        generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(twodoku,
+                                                                                          solution_twodoku,
                                                                                           mutation_rate=mut,
                                                                                           crossover_rate=cross,
                                                                                           local_search=True,
                                                                                           population_size=150,
                                                                                           runs=15)
 
-        save_a_list("medium_1", times_exec, "times_exec", f"mut_{str(mut)}_cross_{str(cross)}")
         save_a_list("medium_1", solution_found, "solution_found", f"mut_{str(mut)}_cross_{str(cross)}")
         save_a_list("medium_1", generation_counts, "generation_counts", f"mut_{str(mut)}_cross_{str(cross)}")
         save_a_multilist("medium_1", fitness_histories, "fitness_histories", f"mut_{str(mut)}_cross_{str(cross)}")
+
+def run_experiment(mut, cross, runs, local_search, elite, max_gens, pop_size=150):
+    print(f'Running experiment:\n---------------\n'
+          f'runs = {runs}\n'
+          f'mutation rate = {mut}\n'
+          f'crossover rate = {cross}\n'
+          f'local search = {local_search}\n'
+          f'elite = {elite}\n'
+          f'max generations = {max_gens}\n'
+          f'population size = {pop_size}\n---------------\n')
+    generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(
+        twodoku, solution_twodoku,
+        mutation_rate=mut,
+        crossover_rate=cross,
+        local_search=local_search,
+        elite=elite,
+        population_size=pop_size,
+        runs=runs,
+        max_generations=max_gens)
+    save_a_list(f'{PATH}{twodoku_name}', solution_found, "solution_found",
+                f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_list(f'{PATH}{twodoku_name}', generation_counts, "generation_counts",
+                f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_multilist(f'{PATH}{twodoku_name}', fitness_histories, "fitness_histories",
+                     f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_multilist(f'{PATH}{twodoku_name}', fitness_mean_histories, "fitness_mean_histories",
+                     f"mut_{str(mut)}_cross_{str(cross)}")
+    save_a_multilist(f'{PATH}{twodoku_name}', fitness_median_histories, "fitness_median_histories",
+                     f"mut_{str(mut)}_cross_{str(cross)}")
+    print("Experiment finished")
+
+
+if __name__ == '__main__':
+    # Specify the path to save the results, must end with / character
+    PATH = './results/'
+
+    ### Change these to run with different twodoku levels
+    twodoku_name = 'easy_1'
+    twodoku = easy_twodoku_1
+    solution_twodoku = solution_easy_twodoku_1
+    print(f"The {twodoku_name} twodoku is used.")
+
+    # Change this to TRUE to run the rates experiment
+    RUN_RATES_EXPERIMENT = False
+
+    if RUN_RATES_EXPERIMENT is True:
+        run_ga_mutation_crosover_rates(twodoku, solution_twodoku)
+
+    RUN_EXPERIMENT = True
+    if RUN_EXPERIMENT is True:
+        # Define the settings you want to run
+        mut = 0.2
+        cross = 0.2
+        runs = 1
+        local_search = False
+        elite = False
+        max_gens = 5000
+        pop_size = 150
+        run_experiment(mut=mut, cross=cross, runs=runs, local_search=local_search, elite=elite, max_gens=max_gens, pop_size=pop_size)
