@@ -137,12 +137,18 @@ class SudokuGA:
             if len(C) > 1:
                 for illegal_column, other_column in combinations(C, 2):
 
-                    # find the rows that they have repeated numbers
-                    repeated_numbers_illegal_column = [(x, index) for index, x in
-                                                       enumerate(individual[:, illegal_column])
-                                                       if Counter(individual[:, illegal_column])[x] > 1]
-                    repeated_numbers_other_column = [(x, index) for index, x in enumerate(individual[:, other_column])
-                                                     if Counter(individual[:, other_column])[x] > 1]
+                    # find the blocks that they have repeated numbers
+                    repeated_numbers_illegal_column = []
+                    for index, x in enumerate(individual[:, illegal_column]):
+                        if Counter(individual[:, illegal_column])[x] > 1:
+                            block_index = index % 3
+                            repeated_numbers_illegal_column.append((x, block_index))
+                    
+                    repeated_numbers_other_column = []
+                    for index, x in enumerate(individual[:, other_column]):
+                        if Counter(individual[:, other_column])[x] > 1:
+                            block_other_index = index % 3
+                            repeated_numbers_illegal_column.append((x, block_other_index))
 
                     for value, index in repeated_numbers_illegal_column:
                         for other_value, other_index in repeated_numbers_other_column:
@@ -166,19 +172,27 @@ class SudokuGA:
         def swap_rows(individual, upper = True):
 
             if upper:
-                C = [c for c in range(6) if len(set(individual[c, :])) != 9]
+                R = [r for r in range(6) if len(set(individual[r, :])) != 9]
                 help_array = self.help_array_rows_format[:9]
             else:
-                C = [c for c in range(6) if len(set(individual[c+3, :])) != 9] #Skip the first 3 rows of the lower sudoku
+                R = [r for r in range(6) if len(set(individual[r+3, :])) != 9] #Skip the first 3 rows of the lower sudoku
                 help_array = self.help_array_rows_format[-9:]
-            if len(C) > 1:
-                for illegal_row, other_row in combinations(C, 2):
+            if len(R) > 1:
+                for illegal_row, other_row in combinations(R, 2):
 
                     # find the rows that they have repeated numbers
-                    repeated_numbers_illegal_row = [(x, index) for index, x in enumerate(individual[illegal_row, :])
-                                                    if Counter(individual[illegal_row, :])[x] > 1]
-                    repeated_numbers_other_row = [(x, index) for index, x in enumerate(individual[other_row, :])
-                                                  if Counter(individual[other_row, :])[x] > 1]
+                    repeated_numbers_illegal_row = []
+                    for index, x in enumerate(individual[illegal_row, :]):
+                        if Counter(individual[illegal_row, :])[x] > 1:
+                            block_index = index % 3
+                            repeated_numbers_illegal_row.append((x, block_index))
+
+                    repeated_numbers_other_row = []
+                    for index, x in enumerate(individual[other_row, :]):
+                        if Counter(individual[other_row, :])[x] > 1:
+                            block_other_index = index % 3
+                            repeated_numbers_other_row.append((x, block_other_index))
+
 
                     for value, index in repeated_numbers_illegal_row:
                         for other_value, other_index in repeated_numbers_other_row:
