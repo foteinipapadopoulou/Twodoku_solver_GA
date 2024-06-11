@@ -205,9 +205,9 @@ def save_a_multilist(twodoku_name, list_to_save, name_of_list, extra_params):
             file.write("\n")
 
 # read a multilist
-def read_a_multilist(twodoku_name, list_to_read, name_of_list, extra_params):
+def read_a_multilist(PATH, twodoku_name, name_of_list, extra_params):
     fitnesses_total = []
-    with open(f'./results/no local search/{twodoku_name}_{name_of_list}_{extra_params}.txt', 'r') as file:
+    with open(f'{PATH}{twodoku_name}_{name_of_list}_{extra_params}.txt', 'r') as file:
         list_to_save = file.readlines()
         for item in list_to_save:
             item = item.replace('[', '').replace(']', '').replace(',', '').split()
@@ -216,6 +216,14 @@ def read_a_multilist(twodoku_name, list_to_read, name_of_list, extra_params):
                 fitnesses.append(int(i))
             fitnesses_total.append(fitnesses)
     return fitnesses_total
+
+def read_list(PATH, twodoku_name, name_of_list, extra_params):
+    with open(f'{PATH}{twodoku_name}_{name_of_list}_{extra_params}.txt', 'r') as file:
+        list_to_save = file.readlines()
+        l = []
+        for i in list_to_save:
+            l.append(int(i))
+    return l
 
 if __name__ == '__main__':
     l = read_a_multilist('medium_1', 'fitness_histories', 'fitness_histories', r'mut_0.2_cross_0.2')
