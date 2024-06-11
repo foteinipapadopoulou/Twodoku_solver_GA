@@ -213,7 +213,7 @@ def read_a_multilist(PATH, twodoku_name, name_of_list, extra_params):
             item = item.replace('[', '').replace(']', '').replace(',', '').split()
             fitnesses = []
             for i in item:
-                fitnesses.append(int(i))
+                fitnesses.append(i)
             fitnesses_total.append(fitnesses)
     return fitnesses_total
 

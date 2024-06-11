@@ -277,10 +277,10 @@ class SudokuGA:
 
             # Calculate fitness of the best
             best_fitness = self.fitness(self.population[0])
-
+            pop_fitnesses = [self.fitness(individual) for individual in self.population]
             # Calculate mean and median fitness of the population
-            mean_fitness = np.mean([self.fitness(individual) for individual in self.population])
-            median_fitness = np.median([self.fitness(individual) for individual in self.population])
+            mean_fitness = np.mean(pop_fitnesses)
+            median_fitness = np.median(pop_fitnesses)
 
             self.fitness_history.append(best_fitness)
             self.fitness_mean_history.append(mean_fitness)
@@ -324,7 +324,7 @@ class SudokuGA:
         return True
 
 
-def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, population_size=150, mutation_rate=0.3,
+def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=3, population_size=150, mutation_rate=0.3,
                    crossover_rate=0.3, max_generations=5000, local_search=True, elite=False):
     solution_found = []
     generation_counts = []
@@ -372,10 +372,11 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=10, popula
     return generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories
 
 
-def run_ga_mutation_crosover_rates(twodoku, solution_twodoku,runs, local_search, elite, max_gens, pop_size=150):
-    rates = [0.2, 0.3, 0.4]
+def run_ga_mutation_crossover_rates(twodoku, solution_twodoku, runs, local_search, elite, max_gens, pop_size=150):
+    cross_rates = [0.2, 0.3, 0.4]
+    mut_rates = [0.05, 0.1, 0.2]
     # Generate all combinations of mutation and crossover rates
-    comb = list(product(rates, rates))
+    comb = list(product(mut_rates, cross_rates))
 
     # Print all combinations
     for mut, cross in comb:
@@ -387,7 +388,7 @@ def run_ga_mutation_crosover_rates(twodoku, solution_twodoku,runs, local_search,
               f'elite = {elite}\n'
               f'max generations = {max_gens}\n'
               f'population size = {pop_size}\n---------------\n')
-        if mut == 0.2:
+        if mut == 0.1: ######### CHANGE it!!!!!!
 
             generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(twodoku,
                                                                                               solution_twodoku,
@@ -438,36 +439,44 @@ def run_experiment(twodoku, solution_twodoku, mut, cross, runs, local_search, el
 
 
 if __name__ == '__main__':
-    # Specify the path to save the results, must end with / character
-    PATH = './results/'
-
-    ### Change these to run with different twodoku levels
-    twodoku_name = 'medium_1'
-    twodoku = medium_twodoku_1
-    solution_twodoku = solution_medium_twodoku_1
-    print(f"The {twodoku_name} twodoku is used.")
-
     # Change this to TRUE to run the rates experiment
     RUN_RATES_EXPERIMENT = True
 
     if RUN_RATES_EXPERIMENT is True:
+        PATH = './results/rates/'    # Specify the path to save the results, must end with / character
+
+        ### Change these to run with different twodoku levels
+        twodoku_name = 'medium_1'
+        twodoku = medium_twodoku_1
+        solution_twodoku = solution_medium_twodoku_1
+        print(f"The {twodoku_name} twodoku is used.")
+
         runs = 15
-        local_search = True
+        local_search = False
         elite = False
         max_gens = 5000
         pop_size = 150
-        run_ga_mutation_crosover_rates(twodoku, solution_twodoku, runs=runs, local_search=local_search, elite=elite,
-                                       max_gens=max_gens, pop_size=pop_size)
+        run_ga_mutation_crossover_rates(twodoku, solution_twodoku, runs=runs, local_search=local_search, elite=elite,
+                                        max_gens=max_gens, pop_size=pop_size)
 
     RUN_EXPERIMENT = False
     if RUN_EXPERIMENT is True:
+        PATH = './results/comparison/'  # Specify the path to save the results, must end with / character
+
+        ### Change these to run with different twodoku levels
+        twodoku_name = 'medium_1'
+        twodoku = medium_twodoku_1
+        solution_twodoku = solution_medium_twodoku_1
+        print(f"The {twodoku_name} twodoku is used.")
+
+
         # Define the settings you want to run
-        mut = 0.2
-        cross = 0.2
-        runs = 100
-        local_search = False
-        elite = True
-        max_gens = 5000
+        mut = 0.2 ### Change this
+        cross = 0.2 ### Change this
+        runs = 50
+        local_search = False ### Change this
+        elite = False ### Change this
+        max_gens = 10000
         pop_size = 150
         run_experiment(twodoku=twodoku, solution_twodoku=solution_twodoku, mut=mut, cross=cross, runs=runs,
                        local_search=local_search, elite=elite, max_gens=max_gens, pop_size=pop_size)

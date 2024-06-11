@@ -39,7 +39,7 @@ def plot_boxplot(df):
 
 
 def plot_boxplot_generations_per_rates():
-    PATH = './results/no local search/'
+    PATH = 'results/old_tourn_size_10/no local search/'
     gens_data = load_generation_data(PATH)
     df = prepare_data(gens_data)
     plot_boxplot(df)
@@ -79,7 +79,7 @@ def plot_fitness(PATH, name):
 
 
 def plot_fitness_lines_per_puzzle():
-    PATH = './results/Experiment with easy/'
+    PATH = 'results/old_tourn_size_10/Experiment with easy/'
     easy_puzzle_names = ['easy_1', 'easy_2', 'easy_3']
 
     for name in easy_puzzle_names:
