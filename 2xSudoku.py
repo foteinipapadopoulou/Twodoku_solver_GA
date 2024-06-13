@@ -140,15 +140,15 @@ class SudokuGA:
 
                     # find the blocks that they have repeated numbers
                     repeated_numbers_illegal_column = []
-                    for index, x in enumerate(individual[:, illegal_column]):
+                    for row_index, x in enumerate(individual[:, illegal_column]):
                         if Counter(individual[:, illegal_column])[x] > 1:
-                            block_index = index % 3
+                            block_index = illegal_column//3 + 3* (row_index//3)
                             repeated_numbers_illegal_column.append((x, block_index))
                     
                     repeated_numbers_other_column = []
-                    for index, x in enumerate(individual[:, other_column]):
+                    for row_index, x in enumerate(individual[:, other_column]):
                         if Counter(individual[:, other_column])[x] > 1:
-                            block_other_index = index % 3
+                            block_other_index = other_column//3 + 3* (row_index//3)
                             repeated_numbers_illegal_column.append((x, block_other_index))
 
                     for value, index in repeated_numbers_illegal_column:
@@ -183,15 +183,15 @@ class SudokuGA:
 
                     # find the rows that they have repeated numbers
                     repeated_numbers_illegal_row = []
-                    for index, x in enumerate(individual[illegal_row, :]):
+                    for col_index, x in enumerate(individual[illegal_row, :]):
                         if Counter(individual[illegal_row, :])[x] > 1:
-                            block_index = index % 3
+                            block_index = col_index//3 + 3* (illegal_row//3)
                             repeated_numbers_illegal_row.append((x, block_index))
 
                     repeated_numbers_other_row = []
-                    for index, x in enumerate(individual[other_row, :]):
+                    for col_index, x in enumerate(individual[other_row, :]):
                         if Counter(individual[other_row, :])[x] > 1:
-                            block_other_index = index % 3
+                            block_other_index = col_index//3 + 3* (other_row//3)
                             repeated_numbers_other_row.append((x, block_other_index))
 
 
@@ -213,6 +213,7 @@ class SudokuGA:
             temp[:9] = swap_rows(temp[:9])
             temp[-9:] = swap_rows(temp[-9:], upper=False)
             self.population[index] = blocks(temp)
+
 
     def update_elite_population(self):
         # the elite population is a queue structure , that records the best individuals
@@ -373,8 +374,8 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=3, populat
 
 
 def run_ga_mutation_crossover_rates(twodoku, solution_twodoku, runs, local_search, elite, max_gens, pop_size=150):
-    cross_rates = [0.2, 0.3, 0.4]
-    mut_rates = [0.05, 0.1, 0.2]
+    cross_rates = [0.1, 0.2, 0.3, 0.4]
+    mut_rates = [0.05, 0.1, 0.15, 0.2]
     # Generate all combinations of mutation and crossover rates
     comb = list(product(mut_rates, cross_rates))
 
@@ -440,7 +441,7 @@ def run_experiment(twodoku, solution_twodoku, mut, cross, runs, local_search, el
 
 if __name__ == '__main__':
     # Change this to TRUE to run the rates experiment
-    RUN_RATES_EXPERIMENT = True
+    RUN_RATES_EXPERIMENT = False
 
     if RUN_RATES_EXPERIMENT is True:
         PATH = './results/rates/'    # Specify the path to save the results, must end with / character
@@ -459,7 +460,7 @@ if __name__ == '__main__':
         run_ga_mutation_crossover_rates(twodoku, solution_twodoku, runs=runs, local_search=local_search, elite=elite,
                                         max_gens=max_gens, pop_size=pop_size)
 
-    RUN_EXPERIMENT = False
+    RUN_EXPERIMENT = True
     if RUN_EXPERIMENT is True:
         PATH = './results/comparison/'  # Specify the path to save the results, must end with / character
 
@@ -471,10 +472,10 @@ if __name__ == '__main__':
 
 
         # Define the settings you want to run
-        mut = 0.2 ### Change this
-        cross = 0.2 ### Change this
-        runs = 50
-        local_search = False ### Change this
+        mut = 0.1 ### Change this
+        cross = 0.1 ### Change this
+        runs = 15
+        local_search = True ### Change this
         elite = False ### Change this
         max_gens = 10000
         pop_size = 150
