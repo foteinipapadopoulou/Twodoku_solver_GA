@@ -6,8 +6,8 @@ from utils import read_a_multilist, read_list
 
 
 def load_generation_data(PATH):
-    mutation_rates = [0.2, 0.3] # TODO
-    crossover_rates = [0.2, 0.3] # TODO
+    mutation_rates = [0.05, 0.1, 0.15, 0.2]
+    crossover_rates = [0.1, 0.2, 0.3, 0.4]
     gens_data = {}
 
     for mut_rate in mutation_rates:
@@ -30,7 +30,7 @@ def prepare_data(gens_data):
 
 def plot_boxplot(df):
     plt.figure(figsize=(10, 6))
-    sns.boxplot(x='Mutation Rate', y='Generations', hue='Crossover Rate', data=df)
+    sns.swarmplot(x='Mutation Rate', y='Generations', hue='Crossover Rate', data=df)
     plt.xlabel('Mutation Rate')
     plt.ylabel('Generations')
     plt.title('Generation Counts by Mutation and Crossover Rates')
@@ -39,7 +39,7 @@ def plot_boxplot(df):
 
 
 def plot_boxplot_generations_per_rates():
-    PATH = 'results/old_tourn_size_10/no local search/'
+    PATH = 'results/rates/'
     gens_data = load_generation_data(PATH)
     df = prepare_data(gens_data)
     plot_boxplot(df)
@@ -87,4 +87,4 @@ def plot_fitness_lines_per_puzzle():
 
 if __name__ == "__main__":
     plot_boxplot_generations_per_rates()
-    plot_fitness_lines_per_puzzle()
+    #plot_fitness_lines_per_puzzle()
