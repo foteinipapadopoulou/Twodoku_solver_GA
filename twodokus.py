@@ -1,4 +1,5 @@
 easy_twodoku_1 = [  # 1st sudoku
+    # sudoku-puzzles.net/twodoku-easy/147/
     [4, 0, 5, 9, 6, 0, 0, 3, 1],
     [9, 3, 7, 2, 0, 5, 0, 6, 0],
     [1, 2, 6, 0, 0, 8, 7, 0, 9],

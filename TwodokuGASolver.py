@@ -1,4 +1,3 @@
-import copy
 import matplotlib.pyplot as plt
 import numpy as np
 import random
@@ -238,7 +237,7 @@ class SudokuGA:
         # .We define the probability Pb to control this process.
         worst_individuals = sorted(self.population, key=lambda x: self.fitness(x), reverse=True)[
                             :self.elite_population_size]
-        for index,individual in enumerate(worst_individuals):
+        for index, individual in enumerate(worst_individuals):
             random_elite_choice = random.choice(
                 self.elite_population)
 
@@ -447,9 +446,9 @@ if __name__ == '__main__':
         PATH = './results/rates/'    # Specify the path to save the results, must end with / character
 
         ### Change these to run with different twodoku levels
-        twodoku_name = 'medium_1'
-        twodoku = medium_twodoku_1
-        solution_twodoku = solution_medium_twodoku_1
+        twodoku_name = 'easy_1'
+        twodoku = easy_twodoku_1
+        solution_twodoku = solution_easy_twodoku_1
         print(f"The {twodoku_name} twodoku is used.")
 
         runs = 15
@@ -462,21 +461,21 @@ if __name__ == '__main__':
 
     RUN_EXPERIMENT = True
     if RUN_EXPERIMENT is True:
-        PATH = './results/comparison/easy_1/'  # Specify the path to save the results, must end with / character
+        PATH = './results/comparison/100_runs/easy_3/'  # Specify the path to save the results, must end with / character
 
         ### Change these to run with different twodoku levels
-        twodoku_name = 'medium_1'
-        twodoku = medium_twodoku_1
-        solution_twodoku = solution_medium_twodoku_1
+        twodoku_name = 'easy_3'
+        twodoku = easy_twodoku_3
+        solution_twodoku = solution_easy_twodoku_3
         print(f"The {twodoku_name} twodoku is used.")
 
 
         # Define the settings you want to run
         mut = 0.1 ### Change this
         cross = 0.1 ### Change this
-        runs = 15
-        local_search = True ### Change this
-        elite = False ### Change this
+        runs = 100
+        local_search = False ### Change this
+        elite = True ### Change this
         max_gens = 10000
         pop_size = 150
         run_experiment(twodoku=twodoku, solution_twodoku=solution_twodoku, mut=mut, cross=cross, runs=runs,

@@ -30,10 +30,10 @@ def prepare_data(gens_data):
 
 def plot_boxplot(df):
     plt.figure(figsize=(10, 6))
-    sns.swarmplot(x='Mutation Rate', y='Generations', hue='Crossover Rate', data=df)
+    sns.boxplot(x='Mutation Rate', y='Generations', hue='Crossover Rate', data=df)
     plt.xlabel('Mutation Rate')
     plt.ylabel('Generations')
-    plt.title('Generation Counts by Mutation and Crossover Rates')
+    plt.title('Generation Counts over Different Mutation and Crossover Rates')
     plt.legend(title='Crossover Rate')
     plt.show()
 
@@ -61,30 +61,36 @@ def calculate_average_fitness_per_generation(all_runs):
 
 def plot_fitness(PATH, name):
     elite = [True, False]
-    local_search = [False]
-    plt.figure(figsize=(10, 6))
+    local_search = [False, True]
+    plt.figure(figsize=(8, 6))
     for elite_flag in elite:
         for local_search_flag in local_search:
-            fitnesses = read_a_multilist(f'{PATH}{name}/', name, 'fitness_mean_histories',
-                                         f'local_search_{local_search_flag}_elite_{elite_flag}')
-            # calculate the average fitnesses per generation for every run
-            average_fitnesses = calculate_average_fitness_per_generation(fitnesses)
-            label = f'Local Search: {local_search_flag}, Elite: {elite_flag}'
-            plt.plot(average_fitnesses, label=label)
+            if not(local_search_flag and elite_flag):
+                fitnesses = read_a_multilist(f'{PATH}{name}/', name, 'fitness_mean_histories',
+                                             f'local_search_{local_search_flag}_elite_{elite_flag}')
+                # calculate the average fitnesses per generation for every run
+                average_fitnesses = calculate_average_fitness_per_generation(fitnesses)
+                if local_search_flag:
+                    label = 'Local Search'
+                elif elite_flag:
+                    label = 'Elite Population Learning'
+                else:
+                    label = 'Baseline'
+                plt.plot(average_fitnesses, label=label)
     plt.legend()
     plt.xlabel('Generation')
-    plt.ylabel('Average Mean Fitness population')
-    plt.title(f'Average Mean Fitness population per Generation for {name} twodoku')
+    plt.ylabel('Average Mean Fitness Population')
+    plt.title(f'Average Mean Fitness Population per Generation for {name} Twodoku')
     plt.show()
 
 
 def plot_fitness_lines_per_puzzle():
-    PATH = 'results/old_tourn_size_10/Experiment with easy/'
+    PATH = './results/comparison/100_runs/'
     easy_puzzle_names = ['easy_1', 'easy_2', 'easy_3']
 
     for name in easy_puzzle_names:
         plot_fitness(PATH, name)
 
 if __name__ == "__main__":
-    plot_boxplot_generations_per_rates()
-    #plot_fitness_lines_per_puzzle()
+    #plot_boxplot_generations_per_rates()
+    plot_fitness_lines_per_puzzle()
