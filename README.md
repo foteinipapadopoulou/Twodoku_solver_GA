@@ -2,16 +2,18 @@
 This repository contains the source code along with different Twodoku puzzles of 3 different levels of difficulty. The code is written in Python and uses a genetic algorithm to solve the Twodoku puzzles.
 Specifically, the file:
 * `TwodokuGASolver.py` contains the code for the genetic algorithm.
+* `main.py` contains the code to run the genetic algorithm using arguments.
 * `twodokus.py` contains the Twodoku puzzles.
 * `utils.py` contains utility functions used in the genetic algorithm.
-* `results` folder contains the results of the genetic algorithm for the Twodoku puzzles for local and no local search used.
+* `results` folder contains the results of the genetic algorithm for the Twodoku puzzles for different experiments
 * `stat_tests.py` contains the code to perform the statistical tests.
 * `plots.py` contains the code to generate the plots given in the report.
 
 ## Installation
 
 To run the code, you need to have Python 3.x installed on your machine.
-2. Clone the repository to your local machine by typing the following command in your terminal:
+
+1. Clone the repository to your local machine by typing the following command in your terminal:
 ```git clone https://github.com/foteinipapadopoulou/Twodoku_solver_GA.git```
 3. Navigate to the directory where the repository is cloned.
 4. Install the required packages by typing the following command in your terminal:
