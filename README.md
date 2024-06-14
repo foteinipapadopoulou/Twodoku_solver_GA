@@ -49,7 +49,7 @@ To run the code, you need to have Python 3.x installed on your machine.
 ## Example
 To run the genetic algorithm for the Twodoku puzzle `easy_1` with local search enabled, mutation rate 0.1 and save the results in the `results` folder, type the following command in your terminal:
 
-```python main.py --twodoku_level easy_1 --path ./results/ --local_search --mut 0.1```
+```python main.py --twodoku_level easy_3 --path ./results/ --local_search --mut 0.1```
 
 Then an experiment will be run with the specified parameters and the results will be saved in the `results` folder. The console will print the selected parameters and for every run and per 100 generations will print the best fitness value, the mean and the median fitness value of the population.
 ```
