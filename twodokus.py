@@ -231,7 +231,7 @@ solution_medium_twodoku_2 = [
 ]
 
 
-hard_twodoku = [
+hard_twodoku_1 = [
     # https://sudoku-puzzles.net/twodoku-hard/94
     # 1st sudoku
     [1, 0, 0, 0, 0, 3, 6, 0, 8],
@@ -254,7 +254,7 @@ hard_twodoku = [
     [0, 1, 0, 9, 0, 0, 7, 0, 0],
     [0, 7, 0, 0, 8, 0, 0, 1, 0],
 ]
-solution_hard_twodoku = [
+solution_hard_twodoku_1 = [
     # https://sudoku-puzzles.net/twodoku-hard/94
     # 1st sudoku
     [1, 9, 7, 5, 4, 3, 6, 2, 8],

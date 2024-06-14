@@ -12,7 +12,6 @@ from matplotlib import pyplot as plt
 def extract_seq_blocks(puzzle):
     """
     Takes a sudoku puzzle and makes a sequence of every 3x3 block of the puzzle
-
     Returns a list of sequences, each representing one block
     """
     sequences = []
@@ -26,6 +25,9 @@ def extract_seq_blocks(puzzle):
 
 
 def blocks(puzzle):
+    """
+    Extracts and combines blocks from the upper and lower halves of a Twodoku puzzle.
+    """
     upper_sudoku = extract_seq_blocks(puzzle[:9])
     lower_sudoku = extract_seq_blocks(puzzle[-9:])
     mixed_sudoku = upper_sudoku + lower_sudoku[1:]
@@ -35,7 +37,7 @@ def blocks(puzzle):
 def single_blocks_to_rows(blocks):
     """
     Takes a sequence of 3x3 block of puzzles
-    Returns back a sudoku puzzle of row- column format
+    Returns back a sudoku puzzle of row-column format
     """
     rows = [[0] * 9 for _ in range(9)]
     for block_index, block in enumerate(blocks):
@@ -50,6 +52,9 @@ def single_blocks_to_rows(blocks):
 
 
 def blocks_to_rows(cand_blocked):
+    """
+    Convert the block-formatted candidate to row-column format
+    """
     upper_sudoku = single_blocks_to_rows(cand_blocked[:9])
     lower_sudoku = single_blocks_to_rows(cand_blocked[-9:])
     return np.array(upper_sudoku + lower_sudoku)
@@ -72,9 +77,9 @@ def fixed_positions(seq):
 
 def random_fill(sequences_cand):
     """
-    Takes a list of sequences and for each sequence it replaces 0s with a random number between 1 and 9,
+    Takes a list of sequences and for each sequence it replaces 0s
+    with a random number between 1 and 9,
     that does not already exist in it.
-
     Returns the updated list
     """
 
@@ -125,11 +130,11 @@ def single_fitness(cand):
 
 def single_scores_crossover(cand):
     """
-        Takes as argument a candidate from the population and
-        calculates the repeating integers in each row and each column.
+    Takes as argument a candidate from the population and
+    calculates the repeating integers in each row and each column.
 
-        Returns the sum of the row and column counts
-        """
+    Returns the sum of the row and column counts
+    """
     # Initialize a list to store all rows of the sudoku
     scores_row = []
 
@@ -163,6 +168,9 @@ def single_scores_crossover(cand):
 
 
 def scores_crossover(cand):
+    """
+    Computes crossover scores for a given candidate by combining the upper and lower sections.
+    """
     upper_scores = single_scores_crossover(cand[:9])
     lower_scores = single_scores_crossover(cand[-9:])
 
@@ -173,19 +181,28 @@ def scores_crossover(cand):
     scores_col = upper_scores[1][:2] + [combined_col] + lower_scores[1][1:]
     return scores_row, scores_col
 
+
 def save_a_list(twodoku_name, list_to_save, name_of_list, extra_params):
+    """
+    Save a list to a file
+    """
     np.savetxt(f'{twodoku_name}_{name_of_list}_{extra_params}.txt', list_to_save, delimiter="\n", fmt="%s")
 
 
 def save_a_multilist(twodoku_name, list_to_save, name_of_list, extra_params):
+    """
+    Save a list of sublists to a file
+    """
     with open(f'{twodoku_name}_{name_of_list}_{extra_params}.txt', 'w') as file:
         for item in list_to_save:
             file.write("%s" % item)
             file.write("\n")
 
 
-# read a multilist
 def read_a_multilist(PATH, twodoku_name, name_of_list, extra_params):
+    """
+    Read a list of sublists from a file
+    """
     fitnesses_total = []
     with open(f'{PATH}{twodoku_name}_{name_of_list}_{extra_params}.txt', 'r') as file:
         list_to_save = file.readlines()
@@ -199,6 +216,9 @@ def read_a_multilist(PATH, twodoku_name, name_of_list, extra_params):
 
 
 def is_digit(value):
+    """
+    Check if a value is a digit
+    """
     try:
         float(value)
         return True
@@ -207,10 +227,16 @@ def is_digit(value):
 
 
 def is_boolean(value):
+    """
+    Check if a value is a boolean
+    """
     return value == 'True' or value == 'False'
 
 
 def read_list(PATH, twodoku_name, name_of_list, extra_params):
+    """
+    Read a list from a file
+    """
     with open(f'{PATH}{twodoku_name}_{name_of_list}_{extra_params}.txt', 'r') as file:
         list_to_save = file.readlines()
         l = []
@@ -227,7 +253,8 @@ def read_list(PATH, twodoku_name, name_of_list, extra_params):
 
 
 def calculate_mean_generations_counts(twodoku_name, elite, local_search):
-    gens_counts = read_list(f'results/comparison/100_runs/{twodoku_name}/', twodoku_name, 'generation_counts',
+    """Calculate the mean generations count for a given Twodoku puzzle"""
+    gens_counts = read_list(f'results/comparison/{twodoku_name}/', twodoku_name, 'generation_counts',
                             f'local_search_{local_search}_elite_{elite}')
     mean_gens = np.mean(gens_counts)
     print(
@@ -235,7 +262,8 @@ def calculate_mean_generations_counts(twodoku_name, elite, local_search):
 
 
 def calculate_success_rate(twodoku_name, elite, local_search):
-    solutions_found = read_list(f'results/comparison/100_runs/{twodoku_name}/', twodoku_name, 'solution_found',
+    """Calculate the success rate for a given Twodoku puzzle"""
+    solutions_found = read_list(f'results/comparison/{twodoku_name}/', twodoku_name, 'solution_found',
                                 f'local_search_{local_search}_elite_{elite}')
     success_rate = solutions_found.count(True)
     print(
@@ -243,6 +271,8 @@ def calculate_success_rate(twodoku_name, elite, local_search):
 
 
 if __name__ == '__main__':
+    # Adjust the following lines to calculate the mean generations count
+    # and success rate for a specific Twodoku puzzle experiment run
     twodoku_name = 'easy_1'
     elite = True
     local_search = False

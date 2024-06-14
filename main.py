@@ -1,10 +1,10 @@
 import argparse
 from TwodokuGASolver import run_experiment
-from twodokus import easy_twodoku_1, easy_twodoku_2, easy_twodoku_3, hard_twodoku, hard_twodoku_2, medium_twodoku_1, \
+from twodokus import easy_twodoku_1, easy_twodoku_2, easy_twodoku_3, hard_twodoku_1, hard_twodoku_2, medium_twodoku_1, \
     medium_twodoku_2, \
     solution_easy_twodoku_1, \
     solution_easy_twodoku_2, \
-    solution_easy_twodoku_3, solution_hard_twodoku, solution_hard_twodoku_2, solution_medium_twodoku_1, \
+    solution_easy_twodoku_3, solution_hard_twodoku_1, solution_hard_twodoku_2, solution_medium_twodoku_1, \
     solution_medium_twodoku_2
 
 
@@ -32,7 +32,7 @@ def main():
         'easy_3': (easy_twodoku_3, solution_easy_twodoku_3),
         'medium_1': (medium_twodoku_1, solution_medium_twodoku_1),
         'medium_2': (medium_twodoku_2, solution_medium_twodoku_2),
-        'hard_1': (hard_twodoku, solution_hard_twodoku),
+        'hard_1': (hard_twodoku_1, solution_hard_twodoku_1),
         'hard_2': (hard_twodoku_2, solution_hard_twodoku_2)
     }
     twodoku, solution_twodoku = twodoku_dict[args.twodoku_level]

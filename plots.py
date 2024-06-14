@@ -6,6 +6,7 @@ from utils import read_a_multilist, read_list
 
 
 def load_generation_data(PATH):
+    """Load the generation counts for different mutation and crossover rates experiments."""
     mutation_rates = [0.05, 0.1, 0.15, 0.2]
     crossover_rates = [0.1, 0.2, 0.3, 0.4]
     gens_data = {}
@@ -20,6 +21,7 @@ def load_generation_data(PATH):
 
 
 def prepare_data(gens_data):
+    """Prepare the data for the boxplot."""
     data = []
     for key, values in gens_data.items():
         mutation_rate, crossover_rate = key.split('_')[1], key.split('_')[3]
@@ -46,6 +48,7 @@ def plot_boxplot_generations_per_rates():
 
 
 def calculate_average_fitness_per_generation(all_runs):
+    """Calculate the average fitness per generation for all runs."""
     max_generations = max(len(run) for run in all_runs)
     averages = []
 
@@ -60,15 +63,17 @@ def calculate_average_fitness_per_generation(all_runs):
 
 
 def plot_fitness(PATH, name):
+    """
+    Plot the average mean fitness per generation for the different levels puzzles.
+    """
     elite = [True, False]
     local_search = [False, True]
-    plt.figure(figsize=(8, 6))
+    plt.figure(figsize=(6, 4))
     for elite_flag in elite:
         for local_search_flag in local_search:
             if not(local_search_flag and elite_flag):
                 fitnesses = read_a_multilist(f'{PATH}{name}/', name, 'fitness_mean_histories',
                                              f'local_search_{local_search_flag}_elite_{elite_flag}')
-                # calculate the average fitnesses per generation for every run
                 average_fitnesses = calculate_average_fitness_per_generation(fitnesses)
                 if local_search_flag:
                     label = 'Local Search'
@@ -79,17 +84,30 @@ def plot_fitness(PATH, name):
                 plt.plot(average_fitnesses, label=label)
     plt.legend()
     plt.xlabel('Generation')
-    plt.ylabel('Average Mean Fitness Population')
-    plt.title(f'Average Mean Fitness Population per Generation for {name} Twodoku')
+    plt.ylabel('Average Mean Population Fitness')
+    plt.ylim(0, 30)
+    # plt.title(f'Average Mean Fitness Population per Generation for {name} Twodoku')
+    plt.savefig(f'./results/comparison/{name}_plot.png')
     plt.show()
+    #save the plot
+
 
 
 def plot_fitness_lines_per_puzzle():
-    PATH = './results/comparison/100_runs/'
+    """
+    Plot the average mean fitness per generation for the different level puzzles
+    """
+    PATH = './results/comparison/'
     easy_puzzle_names = ['easy_1', 'easy_2', 'easy_3']
-
+    medium_puzzle_names = ['medium_1', 'medium_2']
+    hard_puzzle_names = ['hard_1', 'hard_2']
     for name in easy_puzzle_names:
         plot_fitness(PATH, name)
+    for name in medium_puzzle_names:
+        plot_fitness(PATH, name)
+    for name in hard_puzzle_names:
+        plot_fitness(PATH, name)
+
 
 if __name__ == "__main__":
     #plot_boxplot_generations_per_rates()

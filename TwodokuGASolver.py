@@ -6,10 +6,10 @@ import time
 from collections import Counter
 from itertools import combinations, product
 
-from twodokus import easy_twodoku_1, easy_twodoku_2, easy_twodoku_3, hard_twodoku, medium_twodoku_1, \
+from twodokus import easy_twodoku_1, easy_twodoku_2, easy_twodoku_3, hard_twodoku_1, medium_twodoku_1, \
     solution_easy_twodoku_1, \
     solution_easy_twodoku_2, \
-    solution_easy_twodoku_3, solution_hard_twodoku, solution_medium_twodoku_1
+    solution_easy_twodoku_3, solution_hard_twodoku_1, solution_medium_twodoku_1
 from utils import blocks, blocks_to_rows, extract_seq_blocks, fixed_positions, random_fill, save_a_list, \
     save_a_multilist, scores_crossover, \
     single_fitness
@@ -18,7 +18,7 @@ random.seed(10)
 np.random.seed(10)
 
 
-class SudokuGA:
+class TwodokuGA:
 
     def __init__(self, puzzle,
                  tournament_size=3,
@@ -28,7 +28,7 @@ class SudokuGA:
                  max_generations=100,
                  elite_population_size=50
                  ):
-        self.puzzle = blocks(np.array(puzzle))  # make it from normal row-col format to subblock format
+        self.puzzle = blocks(np.array(puzzle))  # from normal row-col format to subblock format
         self.tournament_size = tournament_size
         self.population_size = population_size
         self.mutation_rate = mutation_rate
@@ -48,8 +48,7 @@ class SudokuGA:
     def initialize_population(self):
         """
         Randomly fills sudoku in n times , without changing the fixed numbers
-
-        Returns n randomly filled sudokus and the fixed positions of the inital sudoku
+        Returns n randomly filled puzzles and the fixed positions of the initial twodoku
         """
 
         seq = self.puzzle
@@ -59,6 +58,9 @@ class SudokuGA:
         return pop, fixed
 
     def fitness(self, cand):
+        """
+        Calculate the fitness of a candidate by summing the fitness of the upper and lower sudoku
+        """
         upper_fitness = single_fitness(cand[:9])
         lower_fitness = single_fitness(cand[-9:])
         return upper_fitness + lower_fitness
@@ -67,7 +69,6 @@ class SudokuGA:
         """
         Samples from the population and returns the one with the best fitness value
         """
-
         samples = random.sample(self.population, self.tournament_size)
         # sort them and return the best
         samples.sort(key=lambda x: self.fitness(x))
@@ -75,8 +76,10 @@ class SudokuGA:
 
     def crossover(self, parent1, parent2):
         """
-        Cross over between two parents and
-        calculate the scores of
+        Cross over between two parents.
+        The crossover is done in two steps:
+        1. Row-wise crossover for child1
+        2. Column-wise crossover for child2
         """
         if random.random() < self.crossover_rate:
             scores = scores_crossover(parent1)
@@ -106,6 +109,10 @@ class SudokuGA:
             return parent1, parent2
 
     def mutate(self, candidate):
+        """
+        Mutates the candidate by swapping two random numbers in a block
+        based on the available numbers that can be changed
+        """
         cand = candidate.copy()
         for block_index, subblock in enumerate(cand):
             if random.random() < self.mutation_rate:
@@ -124,14 +131,15 @@ class SudokuGA:
         return cand
 
     def column_local_search(self):
-        def swap_columns(individual, upper = True):
+        def swap_columns(individual, upper=True):
 
             if upper:
                 # Record all illegal columns in the set C
                 C = [c for c in range(6) if len(set(individual[:, c])) != 9]
                 help_array = self.help_array_rows_format[:9]
-            else: 
-                C = [c for c in range(6) if len(set(individual[:, c+3])) != 9] #Skip the first 3 columns of the lower sudoku
+            else:
+                C = [c for c in range(6) if
+                     len(set(individual[:, c + 3])) != 9]  # Skip the first 3 columns of the lower sudoku
                 help_array = self.help_array_rows_format[-9:]
 
             if len(C) > 1:
@@ -141,13 +149,13 @@ class SudokuGA:
                     repeated_numbers_illegal_column = []
                     for row_index, x in enumerate(individual[:, illegal_column]):
                         if Counter(individual[:, illegal_column])[x] > 1:
-                            block_index = illegal_column//3 + 3* (row_index//3)
+                            block_index = illegal_column // 3 + 3 * (row_index // 3)
                             repeated_numbers_illegal_column.append((x, block_index))
-                    
+
                     repeated_numbers_other_column = []
                     for row_index, x in enumerate(individual[:, other_column]):
                         if Counter(individual[:, other_column])[x] > 1:
-                            block_other_index = other_column//3 + 3* (row_index//3)
+                            block_other_index = other_column // 3 + 3 * (row_index // 3)
                             repeated_numbers_illegal_column.append((x, block_other_index))
 
                     for value, index in repeated_numbers_illegal_column:
@@ -165,17 +173,18 @@ class SudokuGA:
         for index, individual in enumerate(self.population):
             temp = blocks_to_rows(individual)
             temp[:9] = swap_columns(temp[:9])
-            temp[-9:] = swap_columns(temp[-9:], upper = False)
+            temp[-9:] = swap_columns(temp[-9:], upper=False)
             self.population[index] = blocks(temp)
 
     def row_local_search(self):
-        def swap_rows(individual, upper = True):
+        def swap_rows(individual, upper=True):
 
             if upper:
                 R = [r for r in range(6) if len(set(individual[r, :])) != 9]
                 help_array = self.help_array_rows_format[:9]
             else:
-                R = [r for r in range(6) if len(set(individual[r+3, :])) != 9] #Skip the first 3 rows of the lower sudoku
+                R = [r for r in range(6) if
+                     len(set(individual[r + 3, :])) != 9]  # Skip the first 3 rows of the lower sudoku
                 help_array = self.help_array_rows_format[-9:]
             if len(R) > 1:
                 for illegal_row, other_row in combinations(R, 2):
@@ -184,15 +193,14 @@ class SudokuGA:
                     repeated_numbers_illegal_row = []
                     for col_index, x in enumerate(individual[illegal_row, :]):
                         if Counter(individual[illegal_row, :])[x] > 1:
-                            block_index = col_index//3 + 3* (illegal_row//3)
+                            block_index = col_index // 3 + 3 * (illegal_row // 3)
                             repeated_numbers_illegal_row.append((x, block_index))
 
                     repeated_numbers_other_row = []
                     for col_index, x in enumerate(individual[other_row, :]):
                         if Counter(individual[other_row, :])[x] > 1:
-                            block_other_index = col_index//3 + 3* (other_row//3)
+                            block_other_index = col_index // 3 + 3 * (other_row // 3)
                             repeated_numbers_other_row.append((x, block_other_index))
-
 
                     for value, index in repeated_numbers_illegal_row:
                         for other_value, other_index in repeated_numbers_other_row:
@@ -213,10 +221,11 @@ class SudokuGA:
             temp[-9:] = swap_rows(temp[-9:], upper=False)
             self.population[index] = blocks(temp)
 
-
     def update_elite_population(self):
-        # the elite population is a queue structure , that records the best individuals
-        # of each generation and updates them with new optimal individuals.
+        """
+        the elite population is a queue structure , that records the best individuals
+        of each generation and updates them with new optimal individuals.
+        """
 
         for individual in self.population:
             fitness = self.fitness(individual)
@@ -232,9 +241,11 @@ class SudokuGA:
                 sorted(self.elite_population, key=lambda x: self.fitness(x))
 
     def elite_population_learning(self):
-        # In elite population learning, the worst individuals in the population are replaced by a random individual
-        # xrandom from the elite population or are, or are reinitialized.
-        # .We define the probability Pb to control this process.
+        """
+        In elite population learning, the worst individuals in the population
+        are replaced by a random individual xrandom from the elite population
+        or are, or are reinitialized based on a probability Pb to control this process.
+        """
         worst_individuals = sorted(self.population, key=lambda x: self.fitness(x), reverse=True)[
                             :self.elite_population_size]
         for index, individual in enumerate(worst_individuals):
@@ -270,6 +281,14 @@ class SudokuGA:
                 return False
         return True
 
+    def check_valid_pop(self, child):
+        for number, row, column in self.fixed_numbers_rows_columns:
+            if child[row][column] != number:
+                print(f"Change is in {number}")
+                print("Removing wrong pop")
+                return False
+        return True
+
     def solve(self, local_search=True, elite=False):
         for generation in range(self.max_generations):
             # local search
@@ -287,7 +306,8 @@ class SudokuGA:
             self.fitness_median_history.append(median_fitness)
 
             if generation % 100 == 0:
-                print(f"Generation {generation}: Best fitness = {best_fitness}, Mean fitness: = {mean_fitness}, Median fitness: = {median_fitness}")
+                print(
+                    f"Generation {generation}: Best fitness = {best_fitness}, Mean fitness: = {mean_fitness}, Median fitness: = {median_fitness}")
             if best_fitness == 0:
                 # Found Solution
                 print(f"Found solution in Generation {generation}")
@@ -308,21 +328,6 @@ class SudokuGA:
 
         return None, self.max_generations
 
-    def plot_fitness_history(self):
-        plt.plot(self.fitness_history)
-        plt.xlabel('Generation')
-        plt.ylabel('Fitness')
-        plt.title('Best Fitness Value over Generations')
-        plt.show()
-
-    def check_valid_pop(self, child):
-        for number, row, column in self.fixed_numbers_rows_columns:
-            if child[row][column] != number:
-                print(f"Change is in {number}")
-                print("Removing wrong pop")
-                return False
-        return True
-
 
 def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=3, population_size=150, mutation_rate=0.3,
                    crossover_rate=0.3, max_generations=5000, local_search=True, elite=False):
@@ -339,12 +344,12 @@ def run_ga_twodoku(puzzle, solution_puzzle, runs=100, tournament_size=3, populat
 
         start_time = time.time()
 
-        twodoku = SudokuGA(puzzle=puzzle,
-                           tournament_size=tournament_size,
-                           population_size=population_size,
-                           mutation_rate=mutation_rate,
-                           crossover_rate=crossover_rate,
-                           max_generations=max_generations)
+        twodoku = TwodokuGA(puzzle=puzzle,
+                            tournament_size=tournament_size,
+                            population_size=population_size,
+                            mutation_rate=mutation_rate,
+                            crossover_rate=crossover_rate,
+                            max_generations=max_generations)
         solution_pred, generations = twodoku.solve(local_search=local_search, elite=elite)
 
         total_time = time.time() - start_time
@@ -388,26 +393,27 @@ def run_ga_mutation_crossover_rates(twodoku, solution_twodoku, runs, local_searc
               f'elite = {elite}\n'
               f'max generations = {max_gens}\n'
               f'population size = {pop_size}\n---------------\n')
-        if mut == 0.1: ######### CHANGE it!!!!!!
 
-            generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(twodoku,
-                                                                                              solution_twodoku,
-                                                                                              mutation_rate=mut,
-                                                                                              crossover_rate=cross,
-                                                                                              local_search=local_search,
-                                                                                              elite=elite,
-                                                                                              population_size=pop_size,
-                                                                                              max_generations=max_gens,
-                                                                                              runs=runs)
-            extra_params = f'mut_{str(mut)}_cross_{str(cross)}'
-            save_a_list(f'{PATH}{twodoku_name}', solution_found, "solution_found", extra_params)
-            save_a_list(f'{PATH}{twodoku_name}', generation_counts, "generation_counts", extra_params)
-            save_a_multilist(f'{PATH}{twodoku_name}', fitness_histories, "fitness_histories", extra_params)
-            save_a_multilist(f'{PATH}{twodoku_name}', fitness_mean_histories, "fitness_mean_histories",
+        generation_counts, solution_found, fitness_histories, fitness_mean_histories, fitness_median_histories = run_ga_twodoku(
+            twodoku,
+            solution_twodoku,
+            mutation_rate=mut,
+            crossover_rate=cross,
+            local_search=local_search,
+            elite=elite,
+            population_size=pop_size,
+            max_generations=max_gens,
+            runs=runs)
+        extra_params = f'mut_{str(mut)}_cross_{str(cross)}'
+        save_a_list(f'{PATH}{twodoku_name}', solution_found, "solution_found", extra_params)
+        save_a_list(f'{PATH}{twodoku_name}', generation_counts, "generation_counts", extra_params)
+        save_a_multilist(f'{PATH}{twodoku_name}', fitness_histories, "fitness_histories", extra_params)
+        save_a_multilist(f'{PATH}{twodoku_name}', fitness_mean_histories, "fitness_mean_histories",
+                         extra_params)
+        save_a_multilist(f'{PATH}{twodoku_name}', fitness_median_histories, "fitness_median_histories",
                              extra_params)
-            save_a_multilist(f'{PATH}{twodoku_name}', fitness_median_histories, "fitness_median_histories",
-                             extra_params)
-            print("Experiment finished")
+        print("Experiment finished")
+
 
 def run_experiment(twodoku, solution_twodoku, mut, cross, runs, local_search, elite, max_gens, pop_size=150):
     print(f'Running experiment:\n---------------\n'
@@ -443,14 +449,11 @@ if __name__ == '__main__':
     RUN_RATES_EXPERIMENT = False
 
     if RUN_RATES_EXPERIMENT is True:
-        PATH = './results/rates/'    # Specify the path to save the results, must end with / character
-
-        ### Change these to run with different twodoku levels
+        PATH = './results/rates/'
         twodoku_name = 'easy_1'
         twodoku = easy_twodoku_1
         solution_twodoku = solution_easy_twodoku_1
         print(f"The {twodoku_name} twodoku is used.")
-
         runs = 15
         local_search = False
         elite = False
@@ -461,21 +464,16 @@ if __name__ == '__main__':
 
     RUN_EXPERIMENT = True
     if RUN_EXPERIMENT is True:
-        PATH = './results/comparison/100_runs/easy_3/'  # Specify the path to save the results, must end with / character
-
-        ### Change these to run with different twodoku levels
+        PATH = 'results/old_trials/100_runs/easy_3/'
         twodoku_name = 'easy_3'
         twodoku = easy_twodoku_3
         solution_twodoku = solution_easy_twodoku_3
         print(f"The {twodoku_name} twodoku is used.")
-
-
-        # Define the settings you want to run
-        mut = 0.1 ### Change this
-        cross = 0.1 ### Change this
+        mut = 0.1
+        cross = 0.1
         runs = 100
-        local_search = False ### Change this
-        elite = True ### Change this
+        local_search = False
+        elite = True
         max_gens = 10000
         pop_size = 150
         run_experiment(twodoku=twodoku, solution_twodoku=solution_twodoku, mut=mut, cross=cross, runs=runs,
