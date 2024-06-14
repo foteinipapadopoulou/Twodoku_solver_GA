@@ -47,7 +47,7 @@ To run the code, you need to have Python 3.x installed on your machine.
 2. The results will be stored in the specified `path` folder.
 
 ## Example
-To run the genetic algorithm for the Twodoku puzzle `easy_1` with local search enabled, mutation rate 0.1 and save the results in the `results` folder, type the following command in your terminal:
+To run the genetic algorithm for the Twodoku puzzle `easy_3` with local search enabled, mutation rate 0.1 and save the results in the `results` folder, type the following command in your terminal:
 
 ```python main.py --twodoku_level easy_3 --path ./results/ --local_search --mut 0.1```
 
