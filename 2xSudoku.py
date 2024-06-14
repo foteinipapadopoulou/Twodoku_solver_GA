@@ -462,7 +462,7 @@ if __name__ == '__main__':
 
     RUN_EXPERIMENT = True
     if RUN_EXPERIMENT is True:
-        PATH = './results/comparison/'  # Specify the path to save the results, must end with / character
+        PATH = './results/comparison/easy_1/'  # Specify the path to save the results, must end with / character
 
         ### Change these to run with different twodoku levels
         twodoku_name = 'medium_1'

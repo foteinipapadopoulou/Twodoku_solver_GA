@@ -217,14 +217,47 @@ def read_a_multilist(PATH, twodoku_name, name_of_list, extra_params):
             fitnesses_total.append(fitnesses)
     return fitnesses_total
 
+
+def is_digit(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+
+def is_boolean(value):
+    return value == 'True' or value == 'False'
+
+
 def read_list(PATH, twodoku_name, name_of_list, extra_params):
     with open(f'{PATH}{twodoku_name}_{name_of_list}_{extra_params}.txt', 'r') as file:
         list_to_save = file.readlines()
         l = []
         for i in list_to_save:
-            l.append(int(i))
+            i = i.strip()
+            if is_digit(i):
+                l.append(float(i))
+            elif is_boolean(i):
+                l.append(i == 'True')
+            else:
+                l.append(i)
+
     return l
 
+def calculate_mean_generations_counts(twodoku_name, elite, local_search):
+    gens_counts = read_list(f'results/comparison/{twodoku_name}/', twodoku_name, 'generation_counts', f'local_search_{local_search}_elite_{elite}')
+    mean_gens = np.mean(gens_counts)
+    print(f"Average Generations Count :{mean_gens} for {twodoku_name} and local_search={local_search} and elite={elite}")
+
+def calculate_success_rate(twodoku_name, elite, local_search):
+    solutions_found = read_list(f'results/comparison/{twodoku_name}/', twodoku_name, 'solution_found', f'local_search_{local_search}_elite_{elite}')
+    success_rate = solutions_found.count(True)
+    print(f"Success Rate :{success_rate}/{len(solutions_found)} for {twodoku_name} and local_search={local_search} and elite={elite}")
+
 if __name__ == '__main__':
-    l = read_a_multilist('medium_1', 'fitness_histories', 'fitness_histories', r'mut_0.2_cross_0.2')
-    print(l)
+    twodoku_name = 'easy_1'
+    elite = False
+    local_search = True
+    calculate_mean_generations_counts(twodoku_name, elite, local_search)
+    calculate_success_rate(twodoku_name, elite, local_search)
