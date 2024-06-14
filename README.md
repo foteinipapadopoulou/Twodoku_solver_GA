@@ -21,10 +21,11 @@ To run the code, you need to have Python 3.x installed on your machine.
 
 ## Usage
 1. Run the `main.py` script by using the command line with the following options:
-```python script_name.py --twodoku <twodoku_level> [options]```
+
+```python main.py --twodoku_level <twodoku_level> [options]```
    1. Required Arguments
         
-      `--twodoku`: Choose the Twodoku level to run. Choices are: `easy_1`, `easy_2`, `easy_3`, `medium_1`, `medium_2`, `hard_1`, `hard_2`.
+      `--twodoku_level`: Choose the Twodoku level to run. Choices are: `easy_1`, `easy_2`, `easy_3`, `medium_1`, `medium_2`, `hard_1`, `hard_2`.
       
       `--path`: Path to save the results.
    2. Optional Arguments
